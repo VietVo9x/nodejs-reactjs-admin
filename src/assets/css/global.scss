@@ -1,0 +1,47 @@
+:root {
+  --primary-color: #fc4d4d;
+  --text-color: #333;
+  --white-color: #fff;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+body {
+  font-family: "Roboto", sans-serif;
+  background-color: #ffffff;
+}
+.container {
+  width: 1200px;
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 10px;
+}
+li {
+  list-style-type: none;
+}
+input,
+textarea {
+  box-sizing: border-box;
+}
+a {
+  color: #333;
+  text-decoration: none;
+}
+.btn {
+  background: var(--primary-color);
+  border-color: transparent;
+  border-radius: 0.25rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  color: var(--white-color);
+  cursor: pointer;
+  display: inline-block;
+  font-size: 0.875rem;
+  font-weight: 400;
+  letter-spacing: 0.1rem;
+  padding: 12px 24px;
+  text-transform: uppercase;
+  transition: all 0.3s linear;
+}

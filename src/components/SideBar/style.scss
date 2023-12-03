@@ -1,0 +1,30 @@
+.sidebar {
+  padding-top: 30px;
+  width: 300px;
+  ul {
+    list-style-type: none;
+    padding: 10px;
+    li {
+      a {
+        display: flex;
+        padding: 12px;
+        margin-top: 10px;
+        border-radius: 4px;
+        align-items: center;
+        gap: 35px;
+        color: #333;
+        text-decoration: none;
+        border-bottom: 2px solid transparent;
+        &:hover {
+          border-bottom: 2px solid #1976d2;
+        }
+      }
+      &:last-child {
+        margin-top: 20px;
+      }
+    }
+  }
+}
+.active {
+  border-bottom: 2px solid #1976d2 !important;
+}

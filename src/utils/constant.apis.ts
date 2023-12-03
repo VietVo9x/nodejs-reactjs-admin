@@ -1,0 +1,12 @@
+export const _LOGIN = "/user/login";
+export const _PRODUCT = "/product";
+export const _PRODUCT_CREATE = "/product/create";
+export const _PRODUCT_UPDATE = "/product/update";
+export const _PRODUCT_DELETE = "/product/delete";
+export const _CATEGORY = "/category";
+export const _ORDER = "/order";
+export const _ORDER_UPDATE = "/order/update";
+export const _USER = "/user";
+export const _USER_UPDATE = "/user/update";
+export const _USER_DELETE = "/user/delete";
+export const _VERIFY_TOKEN = "/verify-token";
