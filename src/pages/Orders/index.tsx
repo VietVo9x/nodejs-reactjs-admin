@@ -112,7 +112,6 @@ export default function Orders() {
               <TableCell align="center">Total price</TableCell>
               <TableCell align="center">Status</TableCell>
               <TableCell align="center">Create at</TableCell>
-              <TableCell align="center">Updated at</TableCell>
               <TableCell align="center">Action</TableCell>
             </TableRow>
           </TableHead>
@@ -134,20 +133,7 @@ export default function Orders() {
                   </TableCell>
 
                   <TableCell align="center">Đã xác thực</TableCell>
-                  {/* <TableCell align="center">
-                  <Typography
-                    component={"span"}
-                    sx={{
-                      display: "-webkit-box",
-                      maxWidth: "50px",
-                      WebkitLineClamp: "2",
-                      WebkitBoxOrient: "vertical",
-                      overflow: "hidden",
-                    }}
-                  >
-                    {order.note}
-                  </Typography>
-                </TableCell> */}
+
                   <TableCell scope="row" align="center">
                     2023-11-12
                   </TableCell>

@@ -7,6 +7,7 @@ export const _PRODUCT_DELETE = "/product/delete";
 export const _CATEGORY = "/category";
 export const _CATEGORY_CREATE = "/category/create";
 export const _CATEGORY_UPDATE = "/category/update";
+export const _CATEGORY_DELETE = "/category/delete";
 export const _ORDER = "/order";
 export const _ORDER_UPDATE = "/order/update";
 export const _USER = "/user";

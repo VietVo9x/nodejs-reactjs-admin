@@ -23,7 +23,7 @@ export default class UserServices {
       msgEmail: "",
       msgUserName: "",
       msgPassword: "",
-      msgPasswordConfirm: "",
+      msgConfirmPassword: "",
     };
 
     //check mail
@@ -56,13 +56,14 @@ export default class UserServices {
     }
 
     //check confirm password
-    if (dataForm.confirm_password !== dataForm.password) {
+    if (!dataForm.confirm_password) {
       error.isError = true;
-      error.msgPasswordConfirm = "Password Confirm do not match";
-    } else if (dataForm.confirm_password.length < 8) {
+      error.msgConfirmPassword = "Password Confirm cannot be empty";
+    } else if (dataForm.confirm_password !== dataForm.password) {
       error.isError = true;
-      error.msgPasswordConfirm = "Password Confirm must be at least 8 characters long";
+      error.msgConfirmPassword = "Password Confirm do not match";
     }
+
     return error;
   }
 }

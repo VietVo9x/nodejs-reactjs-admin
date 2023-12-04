@@ -4,13 +4,15 @@ import Modal from "@mui/material/Modal";
 import TextField from "@mui/material/TextField";
 import React from "react";
 import SendIcon from "@mui/icons-material/Send";
-import { ToastContainer } from "react-toastify";
+import { ToastContainer, toast } from "react-toastify";
 import { Err_Req_Category } from "../../types/error.request";
 import { F_Category } from "../../types/form.type";
+import { Res_Error } from "../../types/error.response";
+import { CategoryServices } from "./category.service";
 
 interface Props {
   openFormCreate: boolean;
-  onShowFormView: Function;
+  onShowFormCreate: Function;
   onCloseForm: Function;
   errorForm: Err_Req_Category;
   setErrorForm: Function;
@@ -18,6 +20,7 @@ interface Props {
   setNewCategory: Function;
 }
 export default function CreateCategory(props: Props) {
+  const categoryService = new CategoryServices();
   const style = {
     position: "absolute" as "absolute",
     top: "50%",
@@ -45,7 +48,27 @@ export default function CreateCategory(props: Props) {
       msgDescription: "",
     });
   };
-  const handleSubmit = () => {};
+  const handleSubmit = async (e: any) => {
+    e.preventDefault();
+
+    try {
+      const validator = categoryService.validate(props.newCategory);
+      props.setErrorForm(validator);
+      if (validator.isError) return;
+      const insertCategory = await categoryService.insertCategory(props.newCategory);
+      console.log(insertCategory);
+      toast.success("Insert Category Success", { autoClose: 1000 });
+      props.setNewCategory({
+        category_name: "",
+        description: "",
+      });
+    } catch (error) {
+      const newErr = error as Res_Error;
+      toast.error(newErr.message, {
+        autoClose: 1000,
+      });
+    }
+  };
   return (
     <div>
       <ToastContainer />

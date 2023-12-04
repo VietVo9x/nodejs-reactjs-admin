@@ -1,7 +1,6 @@
 import * as React from "react";
 import { useEffect, useState } from "react";
 
-import Select, { SelectChangeEvent } from "@mui/material/Select";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import RemoveRedEyeIcon from "@mui/icons-material/RemoveRedEye";
@@ -14,9 +13,7 @@ import {
   TableHead,
   TableRow,
   Paper,
-  Modal,
   Box,
-  TextField,
   Typography,
   Button,
   Pagination,
@@ -27,15 +24,18 @@ import { Res_Category } from "../../types/reponse.type";
 import { getData } from "../../apis/api.service";
 import { CategoryServices } from "./category.service";
 import { ToastContainer, toast } from "react-toastify";
-import { useSearchParams } from "react-router-dom";
 import { Err_Req_Category } from "../../types/error.request";
 import { _CATEGORY } from "../../apis";
 import CreateCategory from "./create.category";
 import { useFormStatus } from "../../utils/function.custom";
 import { F_Category } from "../../types/form.type";
+import ViewCategory from "./view.category";
+import { Res_Error } from "../../types/error.response";
+import { ProductServices } from "../Products/products.service";
 
 export default function Category() {
   const { openFormView, openFormCreate, handleShowForm, handleClose } = useFormStatus();
+  const [flag, setFlag] = useState(false);
   const [categorys, setCategorys] = useState<Res_Category[]>([]);
   const [category, setCategory] = useState<Res_Category | undefined>();
   const [errorForm, setErrorForm] = useState<Err_Req_Category>({
@@ -55,21 +55,50 @@ export default function Category() {
       .then((res) => {
         if (res) setCategorys(res.data);
       })
-      .catch((err) => console.log(err));
-  }, []);
+      .catch((error) => {
+        const newErr = error as Res_Error;
+        toast.error(newErr.message, {
+          autoClose: 1000,
+        });
+      });
+  }, [flag]);
 
   //delete
   const handleDeleteCategory = async (id: number) => {
-    const conf = window.confirm("Are you sure you want to delete");
-    if (!conf) return;
-
-    toast.success("Delete category successfully", { autoClose: 1000 });
-    getData("categorys").then((res) => {
-      setCategorys(res?.data);
-    });
+    try {
+      const conf = window.confirm("Are you sure you want to delete");
+      if (!conf) return;
+      await categoryServices.deleteCategory(id);
+      toast.success("Delete Category Success", { autoClose: 1000 });
+      setFlag(!flag);
+    } catch (error) {
+      const newErr = error as Res_Error;
+      toast.error(newErr.message, {
+        autoClose: 1000,
+      });
+    }
   };
   //edit
-  const handleEditCategory = (id: number) => {};
+  const handleEditCategory = async (element: Res_Category) => {
+    try {
+      let updateCategory;
+      if (element.status == 1) {
+        updateCategory = { status: 0 };
+      } else {
+        updateCategory = { status: 1 };
+      }
+
+      const updateData = await categoryServices.updateStatusCategory(element.id, updateCategory);
+      console.log(updateData);
+      toast.success("Update Status Category Success", { autoClose: 1000 });
+      setFlag(!flag);
+    } catch (error) {
+      const newErr = error as Res_Error;
+      toast.error(newErr.message, {
+        autoClose: 1000,
+      });
+    }
+  };
 
   //show modal
   const handleShowFormView = (element: Res_Category) => {
@@ -145,9 +174,9 @@ export default function Category() {
                       color={element.status ? "primary" : "secondary"}
                       sx={{ marginRight: "10px" }}
                       startIcon={<EditIcon />}
-                      onClick={() => handleEditCategory(element.id)}
+                      onClick={() => handleEditCategory(element)}
                     >
-                      {!element.status ? "Acive" : "Disabled"}
+                      {!element.status ? "Acive" : "UNACTIVE"}
                     </Button>
 
                     <Button
@@ -169,13 +198,20 @@ export default function Category() {
       </Stack>
       {/* modal */}
       <CreateCategory
-        onShowFormView={handleShowFormView}
+        onShowFormCreate={handleShowFormView}
         onCloseForm={handleClose}
         errorForm={errorForm}
         setErrorForm={setErrorForm}
         newCategory={newCategory}
         setNewCategory={setNewCategory}
         openFormCreate={openFormCreate}
+      />
+      <ViewCategory
+        category={category}
+        setCategory={setCategory}
+        onShowFormView={handleShowForm}
+        onCloseForm={handleClose}
+        openFormCreate={openFormView}
       />
     </div>
   );

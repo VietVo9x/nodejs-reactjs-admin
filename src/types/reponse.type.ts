@@ -32,13 +32,7 @@ export interface Res_UserEntity {
   updated_at: string;
   deletedAt: null;
 }
-export interface Res_Category {
-  id: number;
-  category_name: string;
-  description: string;
-  status: number;
-  deleteAt: null | number;
-}
+
 export interface Res_Product {
   id: number;
   product_name: string;
@@ -63,5 +57,5 @@ export interface Res_Category {
   category_name: string;
   description: string;
   status: number;
-  deletedAt: Date;
+  deletedAt: null;
 }

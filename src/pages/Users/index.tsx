@@ -176,7 +176,7 @@ export default function Users() {
           onSearch={handleSearch}
           onClearSearch={clearSearchValue}
         />
-        <FormControl variant="standard" sx={{ m: 1, minWidth: 150, margin: "30px 0 " }}>
+        <FormControl variant="standard" sx={{ m: 1, minWidth: 150, margin: "30px 60px " }}>
           <InputLabel id="demo-simple-select-standard-label">Sort</InputLabel>
           <Select
             labelId="demo-simple-select-standard-label"

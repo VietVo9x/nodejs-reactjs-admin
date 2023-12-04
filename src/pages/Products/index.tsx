@@ -94,7 +94,7 @@ export default function Products() {
   };
   //tim kiem
   const handleSearch = () => {
-    setSearchParams({ ...params, search: searchValue });
+    setSearchParams({ ...params, search: searchValue, page: 1 });
   };
   const clearSearch = () => {
     setSearchParams({ ...params, search: "" });
@@ -299,6 +299,8 @@ export default function Products() {
         setProduct={setProduct}
         toggleChangeImage={toggleChangeImage}
         setToggleChangeImage={setToggleChangeImage}
+        flag={flag}
+        setFlag={setFlag}
       />
       <CreateProduct
         onShowForm={openFormCreate}
@@ -307,6 +309,8 @@ export default function Products() {
         setErrorForm={setErrorForm}
         newProduct={newProduct}
         setNewProduct={setNewProduct}
+        flag={flag}
+        setFlag={setFlag}
       />
     </div>
   );

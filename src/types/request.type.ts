@@ -10,3 +10,6 @@ export interface Req_UserRegister {
   password: string;
   confirm_password: string;
 }
+export interface Req_UpdateStatus {
+  status: number;
+}

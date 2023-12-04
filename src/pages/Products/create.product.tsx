@@ -32,6 +32,8 @@ interface Props {
   setErrorForm: Function;
   newProduct: F_Product;
   setNewProduct: Function;
+  setFlag: Function;
+  flag: boolean;
 }
 export default function CreateProduct(props: Props) {
   const productService = new ProductServices();
@@ -68,12 +70,11 @@ export default function CreateProduct(props: Props) {
         return;
       }
       props.setErrorForm(validator);
-      const insertProduct = await productService.createProduct(props.newProduct);
-      if (insertProduct) {
-        toast.success("Added product successfully", {
-          autoClose: 1000,
-        });
-      }
+      await productService.createProduct(props.newProduct);
+      toast.success("Added product successfully", {
+        autoClose: 1000,
+      });
+      props.setFlag(!props.flag);
     } catch (error) {
       const newError = error as Res_Error;
       toast.error(newError.message, {
@@ -158,11 +159,13 @@ export default function CreateProduct(props: Props) {
                       value={props.newProduct.category_id}
                     >
                       {categorys.length > 0 &&
-                        categorys.map((category, index) => (
-                          <MenuItem value={category.id} key={index}>
-                            {category.category_name}
-                          </MenuItem>
-                        ))}
+                        categorys
+                          .filter((category) => category.status === 1)
+                          .map((category, index) => (
+                            <MenuItem value={category.id} key={index}>
+                              {category.category_name}
+                            </MenuItem>
+                          ))}
                     </Select>
 
                     <FormHelperText style={{ color: "red" }}>

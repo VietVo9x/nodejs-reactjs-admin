@@ -1,5 +1,5 @@
 import SendIcon from "@mui/icons-material/Send";
-import { Box, Button, Modal, TextField } from "@mui/material";
+import { Box, Button, FormHelperText, Modal, TextField } from "@mui/material";
 import { Err_Req_UserRegister } from "../../types/error.request";
 import { F_UserRegister } from "../../types/form.type";
 import { Res_Error } from "../../types/error.response";
@@ -118,7 +118,7 @@ export default function CreateUser(props: Props) {
             <TextField
               margin="normal"
               required
-              id="Password"
+              id="confirm_password"
               type="password"
               label="Confirm Password"
               name="confirm_password"

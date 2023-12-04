@@ -24,6 +24,7 @@ import { ProductServices } from "./products.service";
 import ImageList from "./ImageList";
 import { F_Product_Update } from "../../types/form.type";
 import { toast } from "react-toastify";
+import { Res_Error } from "../../types/error.response";
 
 interface Props {
   onShowForm: boolean;
@@ -32,8 +33,9 @@ interface Props {
   product: Res_Product | undefined;
   setProduct: Function;
   toggleChangeImage: boolean;
-
   setToggleChangeImage: Function;
+  flag: boolean;
+  setFlag: Function;
 }
 export default function UpdateProduct(props: Props) {
   const [categorys, setCategorys] = useState<Res_Category[]>([]);
@@ -41,7 +43,7 @@ export default function UpdateProduct(props: Props) {
   const [isEditing, setIsEditing] = useState(false);
   const [newImages, setNewImages] = useState<Res_Images[]>([]);
   const [dataSend, setDataSend] = useState<F_Product_Update>();
-  console.log(props.product);
+
   const handleFormChange = (e: { target: { name: any; value: any } }) => {
     const name = e.target.name;
     const value = e.target.value;
@@ -71,7 +73,7 @@ export default function UpdateProduct(props: Props) {
         price,
         quantity_stock,
         description,
-        // category_id: props.product?,
+        category_id: category.id,
         fileInput: newImages,
       };
 
@@ -94,39 +96,19 @@ export default function UpdateProduct(props: Props) {
           category_id: dataSend.category_id,
           fileInput: newImages,
         };
-        const res = await productService.editProduct(formData, props.product?.id as number);
+        await productService.editProduct(formData, props.product?.id as number);
 
         toast.success("Product updated successfully", {
           autoClose: 1000,
         });
+        props.setFlag(!props.flag);
       }
     } catch (error) {
-      console.log(error);
+      const newError = error as Res_Error;
+      toast.error(newError.message, {
+        autoClose: 1000,
+      });
     }
-  };
-
-  const fileInputRefs = useRef<any>([]);
-
-  const handleImageClick = (index: number) => {
-    fileInputRefs.current[index].click();
-  };
-
-  // const handleFileChange = (event: any, index: number) => {
-  //   const selectedFile = event.target.files[0];
-  //   console.log("File selected for image", index, ":", selectedFile);
-  //   // Thực hiện xử lý với file đã chọn, có thể lưu vào state hoặc xử lý theo nhu cầu
-  // };
-
-  const handleFileChange = (event: any, index: number) => {
-    const file = event.target.files[0]; // Lấy ra file từ sự kiện onChange
-
-    // Sử dụng FileReader để đọc URL của file
-    const reader = new FileReader();
-    reader.onload = () => {
-      // const updatedImageUrl = reader.result; // URL của ảnh được lưu trong reader.result
-      // handleImageChange(index, updatedImageUrl); // Gọi hàm để cập nhật ảnh với URL mới
-    };
-    reader.readAsDataURL(file); // Đọc file và khi hoàn thành, sẽ gọi sự kiện onload với URL của ảnh
   };
 
   useEffect(() => {
@@ -229,11 +211,13 @@ export default function UpdateProduct(props: Props) {
                       value={props.product?.category.id ?? ""}
                     >
                       {categorys.length > 0 &&
-                        categorys.map((category, index) => (
-                          <MenuItem value={category.id} key={index}>
-                            {category.category_name}
-                          </MenuItem>
-                        ))}
+                        categorys
+                          .filter((category) => category.status === 1)
+                          .map((category, index) => (
+                            <MenuItem value={category.id} key={index}>
+                              {category.category_name}
+                            </MenuItem>
+                          ))}
                       {(!props.product?.category.id ||
                         !categorys.some((cat) => cat.id === props.product?.category.id)) && (
                         <MenuItem value={-1}>Default Category</MenuItem>
