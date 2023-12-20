@@ -1,4 +1,4 @@
 export interface Res_Error {
-  message: string;
+  message: string[] | string;
   errors: null;
 }

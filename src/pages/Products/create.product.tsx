@@ -38,10 +38,16 @@ interface Props {
 export default function CreateProduct(props: Props) {
   const productService = new ProductServices();
   const [categorys, setCategorys] = useState<Res_Category[]>([]);
+  const [category, setCategory] = useState<number | undefined>();
+
   const handleFormChange = (e: { target: { name: any; value: any } }) => {
     const name = e.target.name;
     const value = e.target.value;
     props.setNewProduct({ ...props.newProduct, [name]: value } as F_Product);
+  };
+  const handleSelectChange = (event: { target: any }) => {
+    setCategory(event.target.value);
+    handleFormChange(event);
   };
   const handleFileChange = (event: any) => {
     const files = event.target.files;
@@ -56,6 +62,8 @@ export default function CreateProduct(props: Props) {
     left: "50%",
     transform: "translate(-50%, -50%)",
     width: 800,
+    maxHeight: "100vh",
+    overflowY: "scroll",
     bgcolor: "background.paper",
     boxShadow: 24,
     p: 4,
@@ -85,7 +93,9 @@ export default function CreateProduct(props: Props) {
   //categorys name
   useEffect(() => {
     getData(_CATEGORY).then((res) => {
-      setCategorys(res?.data);
+      const categorys = res?.data.filter((category: Res_Category) => category.status == 1);
+      setCategorys(categorys);
+      setCategory(categorys[0].id);
     });
   }, []);
   useEffect(() => {
@@ -94,7 +104,7 @@ export default function CreateProduct(props: Props) {
     }
   }, [props.newProduct]);
   return (
-    <div>
+    <>
       {/* modal */}
       <ToastContainer />
       <Modal
@@ -150,13 +160,11 @@ export default function CreateProduct(props: Props) {
                     helperText={props.errorForm?.msgQuantityStock}
                   />
                   <FormControl fullWidth>
-                    <InputLabel id="category">Category</InputLabel>
                     <Select
                       id="demo-simple-select-label"
                       name="category_id"
-                      label="category"
-                      onChange={handleFormChange}
-                      value={props.newProduct.category_id}
+                      onChange={handleSelectChange}
+                      value={category}
                     >
                       {categorys.length > 0 &&
                         categorys
@@ -174,7 +182,7 @@ export default function CreateProduct(props: Props) {
                   </FormControl>
                 </Box>
 
-                <Box display={"flex"} gap={2}>
+                <Box display={"flex"} gap={2} alignItems={"baseline"}>
                   <TextField
                     margin="normal"
                     required
@@ -187,6 +195,27 @@ export default function CreateProduct(props: Props) {
                     error={Boolean(props.errorForm?.msgPrice)}
                     helperText={props.errorForm?.msgPrice}
                   />
+                  <FormControl fullWidth>
+                    <Select
+                      id="demo-simple-select-label"
+                      name="brand_id"
+                      onChange={handleSelectChange}
+                      value={"brand"}
+                    >
+                      {categorys.length > 0 &&
+                        categorys
+                          .filter((category) => category.status === 1)
+                          .map((category, index) => (
+                            <MenuItem value={category.id} key={index}>
+                              {category.category_name}
+                            </MenuItem>
+                          ))}
+                    </Select>
+
+                    <FormHelperText style={{ color: "red" }}>
+                      {props.errorForm?.msgCategory}
+                    </FormHelperText>
+                  </FormControl>
                 </Box>
                 <Box display={"flex"} gap={2}>
                   <TextField
@@ -196,13 +225,16 @@ export default function CreateProduct(props: Props) {
                     label="Description"
                     name="description"
                     fullWidth
+                    multiline
+                    minRows={5}
+                    maxRows={10}
                     value={props.newProduct?.description}
                     onChange={handleFormChange}
                     error={Boolean(props.errorForm?.msgDescription)}
                     helperText={props.errorForm?.msgDescription}
                   />
                 </Box>
-                <div>
+                <Box mt={2}>
                   <Input
                     type="file"
                     inputProps={{ multiple: true }}
@@ -227,7 +259,7 @@ export default function CreateProduct(props: Props) {
                   <FormHelperText style={{ color: "red" }}>
                     {props.errorForm?.msgImage}
                   </FormHelperText>
-                </div>
+                </Box>
 
                 <Box display={"flex"} justifyContent={"space-between"}>
                   <Button
@@ -255,6 +287,6 @@ export default function CreateProduct(props: Props) {
           </Modal>
         </Box>
       </Modal>
-    </div>
+    </>
   );
 }

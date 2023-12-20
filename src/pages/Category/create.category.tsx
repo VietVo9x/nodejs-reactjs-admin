@@ -91,7 +91,11 @@ export default function CreateCategory(props: Props) {
               error={Boolean(props.errorForm.msgCategoryName)}
               helperText={props.errorForm.msgCategoryName}
             />
+
             <TextField
+              multiline
+              minRows={5}
+              maxRows={10}
               margin="normal"
               required
               id="description"

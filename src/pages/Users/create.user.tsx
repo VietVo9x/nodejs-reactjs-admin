@@ -13,6 +13,8 @@ interface Props {
   onShow: Function;
   onClose: Function;
   openFormCreate: boolean;
+  flag: boolean;
+  setFlag: Function;
 }
 export default function CreateUser(props: Props) {
   const userService = new UserServices();
@@ -60,11 +62,17 @@ export default function CreateUser(props: Props) {
       toast.success("Successful account registration", {
         autoClose: 1000,
       });
+      props.setFlag(!props.flag);
+      props.onClose();
     } catch (error) {
       const newError = error as Res_Error;
-      toast.error(newError.message, {
-        autoClose: 1000,
-      });
+      if (Array.isArray(newError.message)) {
+        const errorMessage = newError.message.join(", ");
+
+        toast.error(errorMessage, {
+          autoClose: 1000,
+        });
+      }
     }
   };
   return (

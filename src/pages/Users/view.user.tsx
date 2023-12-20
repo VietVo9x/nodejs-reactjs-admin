@@ -1,33 +1,47 @@
 import SendIcon from "@mui/icons-material/Send";
 import { Box, Button, Modal, TextField } from "@mui/material";
 import { useEffect, useState } from "react";
-import { Res_UserEntity } from "../../types/reponse.type";
 import { F_UserInfo } from "../../types/form.type";
+import { User_Res } from "../../types/reponse.type";
 interface Props {
-  data: Res_UserEntity | undefined;
+  data: User_Res | undefined;
   openFormView: boolean;
   onShowViewForm: Function;
   onClose: Function;
 }
 export default function ViewUser(props: Props) {
-  const [dataForm, setFormData] = useState<Res_UserEntity | F_UserInfo>({
+  const [dataForm, setFormData] = useState<User_Res>({
+    id: 0,
     user_name: "",
     email: "",
     password: "",
+    status: false,
+    role: 0,
     full_name: "",
     address: "",
     phone: "",
+    avatar: "",
+    createdAt: "",
+    updatedAt: "",
+    deletedAt: "",
   });
 
   useEffect(() => {
     if (props.data) {
       setFormData({
+        id: props.data.id,
         user_name: props.data.user_name,
         email: props.data.email,
         password: props.data.password,
+        status: props.data.status,
+        role: props.data.role,
         full_name: props.data.full_name,
         address: props.data.address,
         phone: props.data.phone,
+        avatar: props.data.avatar,
+        createdAt: props.data.createdAt,
+        updatedAt: props.data.updatedAt,
+        deletedAt: props.data.deletedAt,
       });
     }
   }, [props.data]);
@@ -36,7 +50,7 @@ export default function ViewUser(props: Props) {
     top: "50%",
     left: "50%",
     transform: "translate(-50%, -50%)",
-    width: 500,
+    maxWidth: "600px",
     bgcolor: "background.paper",
     boxShadow: 24,
     p: 4,
@@ -44,12 +58,19 @@ export default function ViewUser(props: Props) {
   const handleClose = () => {
     props.onClose("view");
     setFormData({
+      id: 0,
       user_name: "",
       email: "",
       password: "",
+      status: false,
+      role: 0,
       full_name: "",
       address: "",
       phone: "",
+      avatar: "",
+      createdAt: "",
+      updatedAt: "",
+      deletedAt: "",
     });
   };
   return (
@@ -69,6 +90,7 @@ export default function ViewUser(props: Props) {
               label="User Name"
               fullWidth
               value={dataForm.user_name}
+              disabled={true}
             />
             <TextField
               margin="normal"
@@ -79,6 +101,7 @@ export default function ViewUser(props: Props) {
               name="email"
               fullWidth
               value={dataForm.email}
+              disabled={true}
             />
             <TextField
               margin="normal"
@@ -87,17 +110,8 @@ export default function ViewUser(props: Props) {
               label="Full Name"
               name="full_name"
               fullWidth
-              value={dataForm.full_name}
-            />
-            <TextField
-              margin="normal"
-              required
-              id="Password"
-              type="password"
-              label="Password"
-              name="password"
-              fullWidth
-              value={dataForm.password}
+              value={dataForm.user_name}
+              disabled={true}
             />
 
             <TextField
@@ -108,6 +122,7 @@ export default function ViewUser(props: Props) {
               name="phone"
               fullWidth
               value={dataForm.phone}
+              disabled={true}
             />
             <TextField
               margin="normal"
@@ -117,6 +132,7 @@ export default function ViewUser(props: Props) {
               name="address"
               fullWidth
               value={dataForm.address}
+              disabled={true}
             />
 
             <Box display={"flex"} justifyContent={"space-between"}>

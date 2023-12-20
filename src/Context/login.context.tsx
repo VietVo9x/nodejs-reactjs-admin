@@ -1,10 +1,10 @@
 import { createContext, Dispatch, SetStateAction, ReactNode, useState } from "react";
-import { Res_UserInfoLogin } from "../types/reponse.type";
+import { User_Res } from "../types/reponse.type";
 export interface I_IsLoginContext {
   isLogin: boolean;
   setIsLogin: Dispatch<SetStateAction<boolean>>;
-  user: Res_UserInfoLogin | undefined;
-  setUser: Dispatch<SetStateAction<Res_UserInfoLogin | undefined>>;
+  user: User_Res | undefined;
+  setUser: Dispatch<SetStateAction<User_Res | undefined>>;
 }
 const defaultState: I_IsLoginContext = {
   isLogin: false,
@@ -19,8 +19,8 @@ interface IsLoginProviderProps {
 }
 
 const IsLoginProvider = ({ children }: IsLoginProviderProps) => {
-  const [isLogin, setIsLogin] = useState<boolean>(false);
-  const [user, setUser] = useState<Res_UserInfoLogin | undefined>(undefined);
+  const [isLogin, setIsLogin] = useState<boolean>(true);
+  const [user, setUser] = useState<User_Res | undefined>(undefined);
   return (
     <IsLoginContext.Provider value={{ isLogin, setIsLogin, user, setUser }}>
       {children}

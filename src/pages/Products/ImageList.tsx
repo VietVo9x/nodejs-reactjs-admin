@@ -1,5 +1,5 @@
 import React from "react";
-import { Card, CardMedia, CardContent, Typography, Grid } from "@mui/material";
+import { Card, CardMedia, Grid } from "@mui/material";
 import { Res_Images } from "../../types/reponse.type";
 interface Props {
   images: Res_Images[];

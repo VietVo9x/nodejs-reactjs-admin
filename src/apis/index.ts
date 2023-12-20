@@ -1,4 +1,4 @@
-export const api = "http://localhost:5000/api/v1";
+export const api = "http://localhost:5000";
 
 export const _PRODUCT = "/product";
 export const _PRODUCT_CREATE = "/product/create";
@@ -10,10 +10,10 @@ export const _CATEGORY_UPDATE = "/category/update";
 export const _CATEGORY_DELETE = "/category/delete";
 export const _ORDER = "/order";
 export const _ORDER_UPDATE = "/order/update";
-export const _USER = "/user";
-export const _REGISTER = "/user/register";
-export const _LOGIN = "/user/login";
-export const _USER_BLOCK = "/user/block";
-export const _USER_UPDATE = "/user/update";
-export const _USER_DELETE = "/user/delete";
-export const _VERIFY_TOKEN = "/verify-token";
+export const _USER = "/users";
+export const _REGISTER = "/users/register";
+export const _LOGIN = "/users/login";
+export const _USER_BLOCK = "/users";
+export const _USER_UPDATE = "/users/update";
+export const _USER_DELETE = "/users/delete";
+export const _VERIFY_TOKEN = "/users/verify-token";

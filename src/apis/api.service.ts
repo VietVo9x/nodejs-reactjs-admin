@@ -3,9 +3,9 @@ import { api } from ".";
 import { axiosInstance } from "./config.axios";
 
 //get data
-export const getData = async (pathName: string) => {
+export const getData = async (pathName: string, params?: any) => {
   try {
-    const response = await axiosInstance.get(api + pathName);
+    const response = await axiosInstance.get(api + pathName, { params: params });
     return response;
   } catch (error) {
     if (error instanceof AxiosError && error.response) {
@@ -41,6 +41,18 @@ export const postData = async (pathName: string, data: any) => {
 export const putData = async (pathName: string, id: any, data: any) => {
   try {
     const response = await axiosInstance.put(`${api}${pathName}/${id}`, data);
+
+    return response;
+  } catch (error) {
+    if (error instanceof AxiosError && error.response) {
+      throw error.response.data;
+    }
+  }
+};
+//edit 1 phan
+export const patchData = async (pathName: string, id: any, data: any) => {
+  try {
+    const response = await axiosInstance.patch(`${api}${pathName}/${id}`, data);
 
     return response;
   } catch (error) {

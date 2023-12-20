@@ -10,22 +10,17 @@ import {
   TableRow,
   Paper,
   Box,
-  TextField,
   Button,
   Pagination,
-  SelectChangeEvent,
-  MenuItem,
   FormControl,
-  InputLabel,
-  Select,
+  NativeSelect,
 } from "@mui/material/";
 import AddIcon from "@mui/icons-material/Add";
 import Stack from "@mui/material/Stack";
 import { formatDate } from "../../utils/format.date";
-import { Res_UserEntity } from "../../types/reponse.type";
+import { User_Res } from "../../types/reponse.type";
 import UserServices from "./user.service";
 import { ToastContainer, toast } from "react-toastify";
-import { useSearchParams } from "react-router-dom";
 import { perPage } from "../../utils/constants";
 import { getData } from "../../apis/api.service";
 import { _USER } from "../../apis";
@@ -41,9 +36,9 @@ import { Res_Error } from "../../types/error.response";
 export default function Users() {
   const { openFormView, openFormCreate, handleShowForm, handleClose } = useFormStatus();
   const [age, setAge] = React.useState("");
-  const [users, setUsers] = useState<Res_UserEntity[]>([]);
+  const [users, setUsers] = useState<User_Res[]>([]);
   const [action, setAction] = useState("");
-  const [userView, setUserView] = useState<Res_UserEntity | undefined>();
+  const [userView, setUserView] = useState<User_Res>();
   const [userCreate, setUserCreate] = useState<F_UserRegister>({
     user_name: "",
     email: "",
@@ -58,6 +53,7 @@ export default function Users() {
     msgConfirmPassword: "",
   });
   const [flag, setFlag] = useState<boolean>(false);
+
   //phân trang, filter , sort , search
   const {
     setSearchParams,
@@ -79,10 +75,10 @@ export default function Users() {
   const fetchData = async () => {
     try {
       const res = await getData(
-        `${_USER}?page=${page}&limit=6&name=${search}&sort=${sortValue}&order=${sortOrder}&role='1'`
+        `${_USER}?page=${page}&limit=10&search_name=${search}&sort_name=${sortValue}&sort_order=${sortOrder}`
       );
-      setUsers(res?.data);
-      setCount(Math.ceil(res?.headers["x-total-users"] / perPage));
+      setUsers(res?.data.users);
+      setCount(Math.ceil(res?.data.totalUsers / perPage));
     } catch (error) {
       console.log(error);
     }
@@ -107,18 +103,18 @@ export default function Users() {
     setSearchValue("");
   };
   //sort
-  const handleChangeSelect = (event: SelectChangeEvent) => {
+  const handleChangeSelect: React.ChangeEventHandler<HTMLSelectElement> = (event) => {
     setSearchParams({ ...params, page: "1" });
     setAge(event.target.value);
 
     switch (event.target.value.toString()) {
       case "1":
-        setSortValue("user_name");
+        setSortValue("name");
         setSortOrder("ASC");
         break;
 
       case "2":
-        setSortValue("user_name");
+        setSortValue("name");
         setSortOrder("DESC");
         break;
       default:
@@ -130,23 +126,32 @@ export default function Users() {
   //services
   const userServices = new UserServices();
 
-  const handleShowViewForm = (user?: Res_UserEntity) => {
-    handleShowForm("view");
+  const handleShowViewForm = (user: User_Res) => {
     setUserView(user);
     setAction(action);
+    handleShowForm("view");
+  };
+
+  const handleShowCreateForm = () => {
+    setUserView(undefined);
+    handleShowForm("create");
   };
   // handle action
 
   //handleEditStatus
-  const handleEditStatus = async (id: number, user: Res_UserEntity) => {
+  const handleEditStatus = async (id: number, user: User_Res) => {
     try {
-      let updateStatusUser;
-      if (user.status == 1) {
-        updateStatusUser = { status: 0 };
+      const updateUser = {
+        user_name: user.user_name,
+        status: "false",
+      };
+      if (user.status) {
+        updateUser.status = "false";
       } else {
-        updateStatusUser = { status: 1 };
+        updateUser.status = "true";
       }
-      await userServices.updateStatusUser(id, updateStatusUser);
+
+      await userServices.updateStatusUser(id, updateUser);
       toast.success("Updated status user successfully", {
         autoClose: 1000,
       });
@@ -164,6 +169,8 @@ export default function Users() {
       {/* filter */}
       <Box
         component={"div"}
+        mt={3}
+        mb={5}
         sx={{
           display: "flex",
           justifyContent: "space-between",
@@ -176,84 +183,96 @@ export default function Users() {
           onSearch={handleSearch}
           onClearSearch={clearSearchValue}
         />
-        <FormControl variant="standard" sx={{ m: 1, minWidth: 150, margin: "30px 60px " }}>
-          <InputLabel id="demo-simple-select-standard-label">Sort</InputLabel>
-          <Select
-            labelId="demo-simple-select-standard-label"
-            id="demo-simple-select-standard"
-            value={age}
-            onChange={handleChangeSelect}
-            label="Age"
+        <Box>
+          <Button
+            variant="contained"
+            sx={{ marginRight: "10px" }}
+            onClick={handleShowCreateForm}
+            startIcon={<AddIcon />}
           >
-            <MenuItem value="">
-              <em>None</em>
-            </MenuItem>
-            <MenuItem value={1}>NAME (A - Z)</MenuItem>
-            <MenuItem value={2}>NAME (Z - A)</MenuItem>
-          </Select>
-        </FormControl>
+            New User
+          </Button>
+        </Box>
+
+        <Box sx={{ minWidth: 150, marginRight: 10 }}>
+          <FormControl fullWidth>
+            <NativeSelect
+              defaultValue={age}
+              inputProps={{
+                name: "age",
+                id: "uncontrolled-native",
+              }}
+              onChange={handleChangeSelect}
+            >
+              <option value={""}>Sort</option>
+              <option value={1}>Name (A - Z)</option>
+              <option value={2}>Name (Z - A)</option>
+            </NativeSelect>
+          </FormControl>
+        </Box>
       </Box>
       {/* table  */}
-      <Box mb={5}>
-        <Button
-          variant="contained"
-          sx={{ marginRight: "10px" }}
-          onClick={() => handleShowForm("create")}
-          startIcon={<AddIcon />}
-        >
-          New User
-        </Button>
-      </Box>
-      <TableContainer component={Paper}>
-        <Table sx={{ minWidth: 650 }} aria-label="simple table">
-          <TableHead>
-            <TableRow>
-              <TableCell>Index</TableCell>
-              <TableCell align="left">UserName</TableCell>
-              <TableCell align="left">Email</TableCell>
-              <TableCell align="left">Role</TableCell>
-              <TableCell align="left">Create at</TableCell>
-              <TableCell align="left">Status</TableCell>
-              <TableCell align="left">Actions</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {users.map((user, index) => (
-              <TableRow key={user.id} sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
-                <TableCell component="th" scope="row">
-                  {index + 1}
-                </TableCell>
-                <TableCell scope="row">{user.user_name}</TableCell>
-                <TableCell align="left">{user.email}</TableCell>
-                <TableCell align="left">{user.role ? "Admin" : "User"}</TableCell>
-                <TableCell align="left">{formatDate(user.created_at)}</TableCell>
-                <TableCell align="left">{user.status ? "Active" : "Block"}</TableCell>
+      {users.length == 0 ? (
+        <div>
+          <h1>khong co gi</h1>
+        </div>
+      ) : (
+        <>
+          <TableContainer component={Paper}>
+            <Table sx={{ minWidth: 650 }} aria-label="simple table">
+              <TableHead>
+                <TableRow>
+                  <TableCell align="center">Index</TableCell>
+                  <TableCell align="center">UserName</TableCell>
+                  <TableCell align="center">Email</TableCell>
+                  <TableCell align="center">Role</TableCell>
+                  <TableCell align="center">Create at</TableCell>
+                  <TableCell align="center">Status</TableCell>
+                  <TableCell align="center">Actions</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {users.map((user, index) => (
+                  <TableRow
+                    key={user.id}
+                    sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+                  >
+                    <TableCell align="center">{index + 1}</TableCell>
+                    <TableCell align="center">{user.user_name}</TableCell>
+                    <TableCell align="center">{user.email}</TableCell>
+                    <TableCell align="center">{user.role == 0 ? "User" : ""}</TableCell>
+                    <TableCell align="center">{formatDate(user.createdAt)}</TableCell>
+                    <TableCell align="center">{user.status ? "Active" : "Block"}</TableCell>
 
-                <TableCell align="left">
-                  <Button
-                    variant="contained"
-                    sx={{ marginRight: "10px" }}
-                    onClick={() => handleShowViewForm(user)}
-                  >
-                    View
-                  </Button>
-                  <Button
-                    variant="contained"
-                    color="error"
-                    onClick={() => handleEditStatus(user.id, user)}
-                  >
-                    Block
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-      {/* phan trang */}
-      <Stack spacing={2} sx={{ padding: "15px 0" }}>
-        <Pagination count={count} page={page} onChange={handleChangePage} color="primary" />
-      </Stack>
+                    <TableCell align="center">
+                      <Button
+                        variant="contained"
+                        sx={{ marginRight: "10px" }}
+                        onClick={() => handleShowViewForm(user)}
+                      >
+                        View
+                      </Button>
+                      <Button
+                        variant="contained"
+                        color="error"
+                        onClick={() => handleEditStatus(user.id, user)}
+                        sx={{ minWidth: "100px" }}
+                      >
+                        {user.status ? "Block" : "Active"}
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+          {/* phan trang */}
+          <Stack spacing={2} sx={{ padding: "15px 0" }}>
+            <Pagination count={count} page={page} onChange={handleChangePage} color="primary" />
+          </Stack>
+        </>
+      )}
+
       {/* modal */}
       <ViewUser
         data={userView}
@@ -269,6 +288,8 @@ export default function Users() {
         openFormCreate={openFormCreate}
         onShow={handleShowForm}
         onClose={handleClose}
+        setFlag={setFlag}
+        flag={flag}
       />
     </div>
   );

@@ -5,13 +5,14 @@ import { Routes, Route, useParams, useLocation, useNavigate } from "react-router
 
 import { links } from "./routes";
 import Login from "./pages/Login";
-import { useContext, useEffect } from "react";
-import { I_IsLoginContext, IsLoginContext } from "./Context/login.context";
-import { checkLogin } from "./utils/auth";
+
 import { useFetchData } from "./hooks/fetchData";
 import CircularIndeterminate from "./components/Progress";
 function App() {
-  const { loading, user, error, isLogin } = useFetchData();
+  // const { loading, user, error, isLogin } = useFetchData();
+  const loading = false;
+  const isLogin = true;
+  const user = { role: 1 };
 
   return (
     <>

@@ -7,7 +7,6 @@ export interface F_UserRegister {
 export interface F_UserInfo {
   user_name: string;
   email: string;
-  password: string;
   full_name: string;
   address: string;
   phone: string;

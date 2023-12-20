@@ -1,19 +1,11 @@
-import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
-import Modal from "@mui/material/Modal";
-import TextField from "@mui/material/TextField";
-import SendIcon from "@mui/icons-material/Send";
+import { Box, Button, Modal, TextField } from "@mui/material";
+import React from "react";
 import { ToastContainer } from "react-toastify";
-import { Category_Res } from "../../types/reponse.type";
+import SendIcon from "@mui/icons-material/Send";
+import { CategoryServices } from "./category.service";
 
-interface Props {
-  openFormCreate: boolean;
-  onShowFormView: Function;
-  onCloseForm: Function;
-  category: Category_Res | undefined;
-  setCategory: Function;
-}
-export default function ViewCategory(props: Props) {
+export default function UpdateCategory() {
+ const categoryService = new CategoryServices();
   const style = {
     position: "absolute" as "absolute",
     top: "50%",
@@ -24,16 +16,22 @@ export default function ViewCategory(props: Props) {
     boxShadow: 24,
     p: 4,
   };
-
-  const handleCloseFromView = () => {
-    props.onCloseForm("view");
+  const handleChange = (e: any) => {
+    
   };
+  const handleCloseFormCreate = () => {
+  
+  };
+  const handleSubmit = async (e: any) => {
+    e.preventDefault();
 
+   
+  };
   return (
     <div>
       <ToastContainer />
       <Modal
-        open={props.openFormCreate}
+        open={false}
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"
       >
@@ -46,8 +44,12 @@ export default function ViewCategory(props: Props) {
               name="category_name"
               label="Category Name"
               fullWidth
-              value={props.category?.name}
+            //   value={props.newCategory.category_name}
+            //   onChange={handleChange}
+            //   error={Boolean(props.errorForm.msgCategoryName)}
+            //   helperText={props.errorForm.msgCategoryName}
             />
+
             <TextField
               multiline
               minRows={5}
@@ -59,16 +61,27 @@ export default function ViewCategory(props: Props) {
               label="Description"
               name="description"
               fullWidth
-              value={props.category?.description}
+            //   value={props.newCategory.description}
+            //   onChange={handleChange}
+            //   error={Boolean(props.errorForm.msgDescription)}
+            //   helperText={props.errorForm.msgDescription}
             />
-
             <Box display={"flex"} justifyContent={"space-between"}>
               <Button
                 variant="contained"
                 type="button"
                 startIcon={<SendIcon />}
                 sx={{ mt: 3, mb: 2 }}
-                onClick={handleCloseFromView}
+                onClick={handleSubmit}
+              >
+                Create
+              </Button>
+              <Button
+                variant="contained"
+                type="button"
+                startIcon={<SendIcon />}
+                sx={{ mt: 3, mb: 2 }}
+                onClick={handleCloseFormCreate}
               >
                 Close
               </Button>
@@ -78,4 +91,6 @@ export default function ViewCategory(props: Props) {
       </Modal>
     </div>
   );
+}
+
 }

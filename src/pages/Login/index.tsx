@@ -36,8 +36,9 @@ export default function Login() {
     setError({ ...error });
     loginServices
       .login(dataForm)
-      .then((reponse) => {
-        setUser(reponse);
+      .then((response) => {
+        console.log(response);
+        setUser(response);
         setIsLogin(true);
         navigate("/dash-board");
       })

@@ -1,9 +1,7 @@
 import * as React from "react";
 import { useState } from "react";
-import InputLabel from "@mui/material/InputLabel";
-import MenuItem from "@mui/material/MenuItem";
+
 import FormControl from "@mui/material/FormControl";
-import Select, { SelectChangeEvent } from "@mui/material/Select";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
@@ -19,6 +17,9 @@ import {
   Box,
   Button,
   Pagination,
+  NativeSelect,
+  Autocomplete,
+  TextField,
 } from "@mui/material/";
 
 import Stack from "@mui/material/Stack";
@@ -29,19 +30,18 @@ import { useSearchParams } from "react-router-dom";
 import { perPage } from "../../utils/constants";
 import { getData } from "../../apis/api.service";
 import { useFormStatus } from "../../utils/function.custom";
-import { Res_Product } from "../../types/reponse.type";
-import UpdateProduct from "./update.product";
 import { F_Product } from "../../types/form.type";
 import CreateProduct from "./create.product";
 import { Err_Req_Product } from "../../types/error.request";
 import CustomizedInputBase from "../../components/InputSearch";
 import { Res_Error } from "../../types/error.response";
+import UpdateProduct from "./update.product";
 export default function Products() {
   const { openFormCreate, openFormUpdate, handleShowForm, handleClose } = useFormStatus();
   const [flag, setFlag] = useState(false);
   const [age, setAge] = React.useState("");
-  const [products, setProducts] = useState<Res_Product[]>([]);
-  const [product, setProduct] = useState<Res_Product | undefined>();
+  const [products, setProducts] = useState<any[]>([]);
+  const [product, setProduct] = useState<any | undefined>();
   const [errorForm, setErrorForm] = useState<Err_Req_Product>({
     isError: false,
     msgSku: "",
@@ -71,66 +71,70 @@ export default function Products() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchValue, setSearchValue] = useState<string>("");
   const [count, setCount] = useState(0);
-  const [sortValue, setSortValue] = useState("");
-  const [sortOrder, setSortOrder] = useState("");
+  // const [sortValue, setSortValue] = useState("");
+  // const [sortOrder, setSortOrder] = useState("");
   const page = Number(searchParams.get("page")) || 1;
-  const search = searchParams.get("search") || "";
-  const params: any = {};
-  searchParams.forEach((value, key) => {
-    params[key] = value;
-  });
+  // const search = searchParams.get("search") || "";
+  const params = React.useRef<{ [key: string]: any }>({ limit: 5 });
   React.useEffect(() => {
-    getData(
-      `/product?page=${page}&limit=6&search=${search}&sort=${sortValue}&order=${sortOrder}`
-    ).then((res: any) => {
+    // console.log(searchParams);
+
+    searchParams.forEach((value, key) => {
+      params.current[key] = value;
+    });
+
+    getData(`/product`, params.current).then((res: any) => {
       setProducts(res?.data);
       setCount(Math.ceil(res?.headers["x-total-products"] / perPage));
     });
-  }, [page, search, sortValue, sortOrder, flag]);
+  }, [searchParams]);
 
   //thay doi trang
   const handleChangePage = (event: React.ChangeEvent<unknown>, value: number) => {
-    setSearchParams({ ...params, page: value.toString() });
+    setSearchParams({ ...params.current, page: value.toString() });
   };
   //tim kiem
   const handleSearch = () => {
-    setSearchParams({ ...params, search: searchValue, page: 1 });
+    setSearchParams({ ...params.current, search: searchValue, page: "1" });
   };
   const clearSearch = () => {
-    setSearchParams({ ...params, search: "" });
+    setSearchParams({ ...params.current, search: "" });
     setSearchValue("");
   };
   //sort
-  const handleChangeSelect = (event: SelectChangeEvent) => {
-    setSearchParams({ ...params, page: "1" });
+  const handleChangeSelect: React.ChangeEventHandler<HTMLSelectElement> = (event) => {
     setAge(event.target.value);
-
     switch (event.target.value.toString()) {
       case "1":
-        setSortValue("product_name");
-        setSortOrder("ASC");
+        setSearchParams({
+          ...params.current,
+          page: "1",
+          sortValue: "product_name",
+          sortOrder: "ASC",
+        });
         break;
-
       case "2":
-        setSortValue("product_name");
-        setSortOrder("DESC");
+        setSearchParams({
+          ...params.current,
+          page: "1",
+          sortValue: "product_name",
+          sortOrder: "DESC",
+        });
+
         break;
 
       case "3":
-        setSortValue("price");
-        setSortOrder("ASC");
-
+        setSearchParams({ ...params.current, page: "1", sortValue: "price", sortOrder: "ASC" });
         break;
       case "4":
-        setSortValue("price");
-        setSortOrder("DESC");
+        setSearchParams({ ...params.current, page: "1", sortValue: "price", sortOrder: "DESC" });
         break;
     }
   };
   //filter data end
 
   //show form update
-  const handleShowFormUpdate = (product: Res_Product) => {
+  const handleShowFormUpdate = (product: any) => {
     console.log("product", product);
     handleShowForm("update");
     setProduct(product);
@@ -198,6 +202,8 @@ export default function Products() {
 
       <Box
         component={"div"}
+        mt={3}
+        mb={5}
         sx={{
           display: "flex",
           justifyContent: "space-between",
@@ -210,42 +216,43 @@ export default function Products() {
           searchValue={searchValue}
           onClearSearch={clearSearch}
         />
-
-        <FormControl variant="standard" sx={{ m: 1, minWidth: 150, margin: "30px 50px " }}>
-          <InputLabel id="demo-simple-select-standard-label">Sort</InputLabel>
-          <Select
-            labelId="demo-simple-select-standard-label"
-            id="demo-simple-select-standard"
-            value={age}
-            onChange={handleChangeSelect}
-            label="Age"
+        <Box>
+          <Button
+            variant="contained"
+            sx={{ marginRight: "10px" }}
+            onClick={handleShowFormNew}
+            startIcon={<AddIcon />}
           >
-            <MenuItem value="">
-              <em>None</em>
-            </MenuItem>
-            <MenuItem value={1}>Name (A - Z)</MenuItem>
-            <MenuItem value={2}>Name (Z - A)</MenuItem>
-            <MenuItem value={3}>Price(Lowest)</MenuItem>
-            <MenuItem value={4}>Thirty(Highest)</MenuItem>
-          </Select>
-        </FormControl>
+            New Product
+          </Button>
+        </Box>
+
+        <Box sx={{ minWidth: 150, marginRight: 10 }}>
+          <FormControl fullWidth>
+            <NativeSelect
+              defaultValue={age}
+              inputProps={{
+                name: "age",
+                id: "uncontrolled-native",
+              }}
+              onChange={handleChangeSelect}
+            >
+              <option value={""}>Sort</option>
+              <option value={1}>Name (A - Z)</option>
+              <option value={2}>Name (Z - A)</option>
+              <option value={3}>Price(Lowest)</option>
+              <option value={4}>Thirty(Highest)</option>
+            </NativeSelect>
+          </FormControl>
+        </Box>
       </Box>
       {/* table  */}
-      <Box mb={5}>
-        <Button
-          variant="contained"
-          sx={{ marginRight: "10px" }}
-          onClick={handleShowFormNew}
-          startIcon={<AddIcon />}
-        >
-          New Product
-        </Button>
-      </Box>
+
       <TableContainer component={Paper}>
         <Table sx={{ minWidth: 650 }} aria-label="simple table">
           <TableHead>
             <TableRow>
-              <TableCell align="center">Index</TableCell>
+              <TableCell scope="row">Index</TableCell>
               <TableCell align="center">Name</TableCell>
               <TableCell align="center">Code</TableCell>
               <TableCell align="center">Price</TableCell>
@@ -257,13 +264,21 @@ export default function Products() {
             {products &&
               products.map((product, index) => (
                 <TableRow key={index}>
-                  <TableCell align="center">{index + 1}</TableCell>
+                  <TableCell
+                    align="center"
+                    sx={{
+                      width: "20px",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {index + 1}
+                  </TableCell>
                   <TableCell align="center">{product.product_name}</TableCell>
                   <TableCell align="center">{product.sku}</TableCell>
                   <TableCell align="center">$ {product.price}.00</TableCell>
-
                   <TableCell align="center">{product.quantity_stock}</TableCell>
-
                   <TableCell align="center">
                     <Button
                       variant="contained"

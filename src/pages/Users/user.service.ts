@@ -10,9 +10,15 @@ export default class UserServices {
       throw error;
     }
   }
-  async updateStatusUser(id: number, status: { status: number }) {
+  async updateStatusUser(
+    id: number,
+    updateUser: {
+      user_name: string;
+      status: string;
+    }
+  ) {
     try {
-      return await putData(_USER_BLOCK, id, status);
+      return await putData(_USER_BLOCK, id, updateUser);
     } catch (error) {
       throw error;
     }
