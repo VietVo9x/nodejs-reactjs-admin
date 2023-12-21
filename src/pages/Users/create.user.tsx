@@ -5,6 +5,7 @@ import { F_UserRegister } from "../../types/form.type";
 import { Res_Error } from "../../types/error.response";
 import { ToastContainer, toast } from "react-toastify";
 import UserServices from "./user.service";
+import { displayError } from "../../utils/common/display-error";
 interface Props {
   userCreate: F_UserRegister;
   setUserCreate: Function;
@@ -34,6 +35,7 @@ export default function CreateUser(props: Props) {
     boxShadow: 24,
     p: 4,
   };
+  //đóng form
   const handleClose = () => {
     props.onClose("create");
     props.setErrorForm({
@@ -50,6 +52,7 @@ export default function CreateUser(props: Props) {
       confirm_password: "",
     });
   };
+  //đăng ký
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     try {
@@ -63,16 +66,9 @@ export default function CreateUser(props: Props) {
         autoClose: 1000,
       });
       props.setFlag(!props.flag);
-      props.onClose();
+      props.onClose("create");
     } catch (error) {
-      const newError = error as Res_Error;
-      if (Array.isArray(newError.message)) {
-        const errorMessage = newError.message.join(", ");
-
-        toast.error(errorMessage, {
-          autoClose: 1000,
-        });
-      }
+      displayError(error);
     }
   };
   return (

@@ -18,6 +18,8 @@ interface Props {
   setErrorForm: Function;
   newCategory: F_Category;
   setNewCategory: Function;
+  flag: boolean;
+  setFlag: Function;
 }
 export default function CreateCategory(props: Props) {
   const categoryService = new CategoryServices();
@@ -55,16 +57,25 @@ export default function CreateCategory(props: Props) {
       const validator = categoryService.validate(props.newCategory);
       props.setErrorForm(validator);
       if (validator.isError) return;
-      const insertCategory = await categoryService.insertCategory(props.newCategory);
-      console.log(insertCategory);
+      await categoryService.insertCategory(props.newCategory);
       toast.success("Insert Category Success", { autoClose: 1000 });
       props.setNewCategory({
-        category_name: "",
+        name: "",
         description: "",
       });
+      props.onCloseForm("create");
+      props.setFlag(!props.flag);
     } catch (error) {
-      const newErr = error as Res_Error;
-      toast.error(newErr.message, {
+      const newError = error as Res_Error;
+
+      if (Array.isArray(newError.message)) {
+        const errorMessage = newError.message.join(", ");
+
+        toast.error(errorMessage, {
+          autoClose: 1000,
+        });
+      }
+      toast.error(newError.message, {
         autoClose: 1000,
       });
     }
@@ -83,10 +94,10 @@ export default function CreateCategory(props: Props) {
               margin="normal"
               required
               type="text"
-              name="category_name"
+              name="name"
               label="Category Name"
               fullWidth
-              value={props.newCategory.category_name}
+              value={props.newCategory.name}
               onChange={handleChange}
               error={Boolean(props.errorForm.msgCategoryName)}
               helperText={props.errorForm.msgCategoryName}
@@ -94,8 +105,8 @@ export default function CreateCategory(props: Props) {
 
             <TextField
               multiline
-              minRows={5}
-              maxRows={10}
+              minRows={6}
+              maxRows={6}
               margin="normal"
               required
               id="description"

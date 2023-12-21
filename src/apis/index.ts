@@ -1,13 +1,13 @@
 export const api = "http://localhost:5000";
 
-export const _PRODUCT = "/product";
-export const _PRODUCT_CREATE = "/product/create";
-export const _PRODUCT_UPDATE = "/product/update";
-export const _PRODUCT_DELETE = "/product/delete";
+export const _PRODUCT = "/products";
+export const _PRODUCT_GET_ALL = "/products/all";
+export const _PRODUCT_GET_DELETE = "/product/delete";
 export const _CATEGORY = "/category";
-export const _CATEGORY_CREATE = "/category/create";
-export const _CATEGORY_UPDATE = "/category/update";
-export const _CATEGORY_DELETE = "/category/delete";
+export const _CATEGORY_CREATE = "/category";
+export const _CATEGORY_UPDATE = "/category";
+export const _CATEGORY_BLOCK = "/category/block";
+export const _CATEGORY_SOFTDELETE = "/category/soft-delete";
 export const _ORDER = "/order";
 export const _ORDER_UPDATE = "/order/update";
 export const _USER = "/users";

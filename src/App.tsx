@@ -9,17 +9,14 @@ import Login from "./pages/Login";
 import { useFetchData } from "./hooks/fetchData";
 import CircularIndeterminate from "./components/Progress";
 function App() {
-  // const { loading, user, error, isLogin } = useFetchData();
-  const loading = false;
-  const isLogin = true;
-  const user = { role: 1 };
-
+  const { loading, user, isLogin } = useFetchData();
+  console.log(isLogin);
   return (
     <>
       <div className="App">
         {loading ? (
           <CircularIndeterminate />
-        ) : isLogin && user && user.role == 1 ? (
+        ) : isLogin ? (
           <>
             <Header />
             <div className="main">

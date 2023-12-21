@@ -9,14 +9,12 @@ import {
   CardMedia,
   FormHelperText,
   Input,
-  InputLabel,
   MenuItem,
   Modal,
   Select,
   Stack,
   TextField,
 } from "@mui/material/";
-import { Res_Category } from "../../types/reponse.type";
 import { getData } from "../../apis/api.service";
 import { _CATEGORY } from "../../apis";
 import { F_Product } from "../../types/form.type";
@@ -24,6 +22,8 @@ import { Err_Req_Product } from "../../types/error.request";
 import { ProductServices } from "./products.service";
 import { ToastContainer, toast } from "react-toastify";
 import { Res_Error } from "../../types/error.response";
+import { Category_Res } from "../../types/reponse.type";
+import { displayError } from "../../utils/common/display-error";
 
 interface Props {
   onShowForm: boolean;
@@ -37,7 +37,7 @@ interface Props {
 }
 export default function CreateProduct(props: Props) {
   const productService = new ProductServices();
-  const [categorys, setCategorys] = useState<Res_Category[]>([]);
+  const [categorys, setCategorys] = useState<Category_Res[]>([]);
   const [category, setCategory] = useState<number | undefined>();
 
   const handleFormChange = (e: { target: { name: any; value: any } }) => {
@@ -82,18 +82,18 @@ export default function CreateProduct(props: Props) {
       toast.success("Added product successfully", {
         autoClose: 1000,
       });
+      props.onCloseForm("create");
       props.setFlag(!props.flag);
     } catch (error) {
-      const newError = error as Res_Error;
-      toast.error(newError.message, {
-        autoClose: 1000,
-      });
+      displayError(error);
     }
   };
   //categorys name
   useEffect(() => {
     getData(_CATEGORY).then((res) => {
-      const categorys = res?.data.filter((category: Res_Category) => category.status == 1);
+      const categorys = res?.categories.filter(
+        (category: Category_Res) => category.status === true
+      );
       setCategorys(categorys);
       setCategory(categorys[0].id);
     });
@@ -133,18 +133,6 @@ export default function CreateProduct(props: Props) {
                     error={Boolean(props.errorForm?.msgProductName)}
                     helperText={props.errorForm?.msgProductName}
                   />
-                  <TextField
-                    margin="normal"
-                    required
-                    id="sku"
-                    label="SKU"
-                    name="sku"
-                    fullWidth
-                    value={props.newProduct.sku}
-                    onChange={handleFormChange}
-                    error={Boolean(props.errorForm?.msgSku)}
-                    helperText={props.errorForm?.msgSku}
-                  />
                 </Box>
                 <Box display={"flex"} gap={2} alignItems={"baseline"}>
                   <TextField
@@ -162,18 +150,16 @@ export default function CreateProduct(props: Props) {
                   <FormControl fullWidth>
                     <Select
                       id="demo-simple-select-label"
-                      name="category_id"
+                      name="categotyId"
                       onChange={handleSelectChange}
                       value={category}
                     >
                       {categorys.length > 0 &&
-                        categorys
-                          .filter((category) => category.status === 1)
-                          .map((category, index) => (
-                            <MenuItem value={category.id} key={index}>
-                              {category.category_name}
-                            </MenuItem>
-                          ))}
+                        categorys.map((category, index) => (
+                          <MenuItem value={category.id} key={index}>
+                            {category.name}
+                          </MenuItem>
+                        ))}
                     </Select>
 
                     <FormHelperText style={{ color: "red" }}>
@@ -195,7 +181,7 @@ export default function CreateProduct(props: Props) {
                     error={Boolean(props.errorForm?.msgPrice)}
                     helperText={props.errorForm?.msgPrice}
                   />
-                  <FormControl fullWidth>
+                  {/* <FormControl fullWidth>
                     <Select
                       id="demo-simple-select-label"
                       name="brand_id"
@@ -204,10 +190,10 @@ export default function CreateProduct(props: Props) {
                     >
                       {categorys.length > 0 &&
                         categorys
-                          .filter((category) => category.status === 1)
+                          .filter((category) => category.status === true)
                           .map((category, index) => (
                             <MenuItem value={category.id} key={index}>
-                              {category.category_name}
+                              {category.name}
                             </MenuItem>
                           ))}
                     </Select>
@@ -215,7 +201,7 @@ export default function CreateProduct(props: Props) {
                     <FormHelperText style={{ color: "red" }}>
                       {props.errorForm?.msgCategory}
                     </FormHelperText>
-                  </FormControl>
+                  </FormControl> */}
                 </Box>
                 <Box display={"flex"} gap={2}>
                   <TextField
@@ -226,8 +212,8 @@ export default function CreateProduct(props: Props) {
                     name="description"
                     fullWidth
                     multiline
-                    minRows={5}
-                    maxRows={10}
+                    minRows={6}
+                    maxRows={6}
                     value={props.newProduct?.description}
                     onChange={handleFormChange}
                     error={Boolean(props.errorForm?.msgDescription)}

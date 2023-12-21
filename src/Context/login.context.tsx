@@ -19,7 +19,7 @@ interface IsLoginProviderProps {
 }
 
 const IsLoginProvider = ({ children }: IsLoginProviderProps) => {
-  const [isLogin, setIsLogin] = useState<boolean>(true);
+  const [isLogin, setIsLogin] = useState<boolean>(false);
   const [user, setUser] = useState<User_Res | undefined>(undefined);
   return (
     <IsLoginContext.Provider value={{ isLogin, setIsLogin, user, setUser }}>

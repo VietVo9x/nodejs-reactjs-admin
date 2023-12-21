@@ -19,6 +19,7 @@ import {
   Pagination,
   FormControl,
   NativeSelect,
+  Switch,
 } from "@mui/material/";
 
 import Stack from "@mui/material/Stack";
@@ -29,20 +30,20 @@ import { ToastContainer, toast } from "react-toastify";
 import { Err_Req_Category } from "../../types/error.request";
 import { _CATEGORY } from "../../apis";
 import CreateCategory from "./create.category";
-import { useFormStatus } from "../../utils/function.custom";
+import { useFormStatus } from "../../utils/customhooks/function.custom";
 import { F_Category } from "../../types/form.type";
-import ViewCategory from "./view.category";
 import { Res_Error } from "../../types/error.response";
 import { perPage } from "../../utils/constants";
 import { useSearchParams } from "react-router-dom";
 import CustomizedInputBase from "../../components/InputSearch";
+import UpdateCategory from "./update.category";
 
 export default function Category() {
-  const { openFormView, openFormCreate, handleShowForm, handleClose } = useFormStatus();
+  const { openFormUpdate, openFormCreate, handleShowForm, handleClose } = useFormStatus();
   const [flag, setFlag] = useState(false);
   const [count, setCount] = useState(0);
   const [categorys, setCategorys] = useState<Category_Res[]>([]);
-  const [category, setCategory] = useState<Category_Res | undefined>();
+  const [category, setCategory] = useState<Category_Res>();
   const [age, setAge] = React.useState("");
   const [errorForm, setErrorForm] = useState<Err_Req_Category>({
     isError: false,
@@ -50,7 +51,7 @@ export default function Category() {
     msgDescription: "",
   });
   const [newCategory, setNewCategory] = useState<F_Category>({
-    category_name: "",
+    name: "",
     description: "",
   });
 
@@ -59,17 +60,14 @@ export default function Category() {
   const page = Number(searchParams.get("page")) || 1;
 
   const params = React.useRef<{ [key: string]: any }>({ limit: 10 });
-  console.log(params);
-  React.useEffect(() => {
-    // console.log(searchParams);
 
+  React.useEffect(() => {
     searchParams.forEach((value, key) => {
       params.current[key] = value;
     });
-    console.log(1111, params);
     getData(_CATEGORY, params.current).then((res: any) => {
-      setCategorys(res.data.categories);
-      setCount(Math.ceil(res.data.total / perPage));
+      setCategorys(res.categories);
+      setCount(Math.ceil(res.total / perPage));
     });
   }, [searchParams, flag]);
 
@@ -80,7 +78,10 @@ export default function Category() {
     try {
       const conf = window.confirm("Are you sure you want to delete");
       if (!conf) return;
-      await categoryServices.deleteCategory(id);
+      const sorfDelete = {
+        isDelete: "true",
+      };
+      await categoryServices.softDelete(id, sorfDelete);
       toast.success("Delete Category Success", { autoClose: 1000 });
       setFlag(!flag);
     } catch (error) {
@@ -90,8 +91,6 @@ export default function Category() {
       });
     }
   };
-  //edit
-  const handleEditCategory = async (element: Category_Res) => {};
 
   //thay doi trang
   const handleChangePage = (event: React.ChangeEvent<unknown>, value: number) => {
@@ -99,10 +98,10 @@ export default function Category() {
   };
   //tim kiem
   const handleSearch = () => {
-    setSearchParams({ ...params.current, search: searchValue, page: "1" });
+    setSearchParams({ ...params.current, search_name: searchValue, page: "1" });
   };
   const clearSearch = () => {
-    setSearchParams({ ...params.current, search: "" });
+    setSearchParams({ ...params.current, search_name: "" });
     setSearchValue("");
   };
 
@@ -111,10 +110,38 @@ export default function Category() {
     setAge(event.target.value);
   };
 
-  //show modal
-  const handleShowFormView = (element: Category_Res) => {
-    handleShowForm("view");
+  //edit
+  const handleShowFormUpdate = async (element: Category_Res) => {
+    handleShowForm("update");
     setCategory(element);
+  };
+  //block
+  const handleChange = async (element: Category_Res) => {
+    try {
+      const updateStatus = {
+        status: "true",
+      };
+      if (element.status) {
+        updateStatus.status = "false";
+      } else {
+        updateStatus.status = "true";
+      }
+      await categoryServices.blockCategory(element.id, updateStatus);
+      setFlag(!flag);
+    } catch (error) {
+      const newError = error as Res_Error;
+
+      if (Array.isArray(newError.message)) {
+        const errorMessage = newError.message.join(", ");
+
+        toast.error(errorMessage, {
+          autoClose: 1000,
+        });
+      }
+      toast.error(newError.message, {
+        autoClose: 1000,
+      });
+    }
   };
 
   return (
@@ -147,24 +174,6 @@ export default function Category() {
         >
           New Category
         </Button>
-        <Box sx={{ minWidth: 150 }}>
-          <FormControl fullWidth>
-            <NativeSelect
-              defaultValue={age}
-              inputProps={{
-                name: "age",
-                id: "uncontrolled-native",
-              }}
-              onChange={handleChangeSelect}
-            >
-              <option value={""}>Sort</option>
-              <option value={1}>Name (A - Z)</option>
-              <option value={2}>Name (Z - A)</option>
-              <option value={3}>Price(Lowest)</option>
-              <option value={4}>Thirty(Highest)</option>
-            </NativeSelect>
-          </FormControl>
-        </Box>
       </Box>
       {categorys.length == 0 ? (
         <div>
@@ -195,25 +204,22 @@ export default function Category() {
                       <TableCell align="center">{index + 1}</TableCell>
                       <TableCell align="center">{element.name}</TableCell>
 
-                      <TableCell align="center">{element.status ? "Active" : "Inactive"}</TableCell>
+                      <TableCell align="center">
+                        <Switch
+                          checked={element.status}
+                          onChange={() => handleChange(element)}
+                          inputProps={{ "aria-label": "controlled" }}
+                        />
+                      </TableCell>
                       <TableCell align="center">{element.description}</TableCell>
 
                       <TableCell align="center">
                         <Button
                           variant="contained"
-                          color="inherit"
-                          sx={{ marginRight: "10px" }}
-                          onClick={() => handleShowFormView(element)}
-                        >
-                          <RemoveRedEyeIcon />
-                        </Button>
-
-                        <Button
-                          variant="contained"
-                          color={element.status ? "primary" : "secondary"}
+                          color={"primary"}
                           sx={{ marginRight: "10px" }}
                           startIcon={<EditIcon />}
-                          onClick={() => handleEditCategory(element)}
+                          onClick={() => handleShowFormUpdate(element)}
                         >
                           Edit
                         </Button>
@@ -239,20 +245,25 @@ export default function Category() {
       )}
       {/* modal */}
       <CreateCategory
-        onShowFormCreate={handleShowFormView}
+        onShowFormCreate={handleShowForm}
         onCloseForm={handleClose}
         errorForm={errorForm}
         setErrorForm={setErrorForm}
         newCategory={newCategory}
         setNewCategory={setNewCategory}
         openFormCreate={openFormCreate}
+        flag={flag}
+        setFlag={setFlag}
       />
-      <ViewCategory
+      <UpdateCategory
+        errorForm={errorForm}
+        onShowFormUpdate={handleShowForm}
+        openFormUpdate={openFormUpdate}
+        onCloseFormUpdate={handleClose}
         category={category}
-        setCategory={setCategory}
-        onShowFormView={handleShowForm}
-        onCloseForm={handleClose}
-        openFormCreate={openFormView}
+        setErrorForm={setErrorForm}
+        flag={flag}
+        setFlag={setFlag}
       />
     </div>
   );

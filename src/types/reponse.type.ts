@@ -18,8 +18,8 @@ export interface User_Res {
   deletedAt: string;
 }
 
-export interface Res_Images {
-  image_url: string;
+export interface Image_Res {
+  imageUrl: string;
 }
 export interface Brand_Res {
   id: number;
@@ -33,5 +33,20 @@ export interface Category_Res {
   description: string;
   status: boolean;
   isDelete: boolean;
-  brands: Brand_Res[];
+}
+
+export interface Product_Res {
+  id: number;
+  price: number;
+  product_name: string;
+  quantity_stock: number;
+  description: string;
+  categoryId: number;
+  brandId: number;
+  status: boolean;
+  isDelete: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  images: Image_Res[];
+  category: Category_Res;
 }

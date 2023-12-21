@@ -6,7 +6,7 @@ import { axiosInstance } from "./config.axios";
 export const getData = async (pathName: string, params?: any) => {
   try {
     const response = await axiosInstance.get(api + pathName, { params: params });
-    return response;
+    return response.data;
   } catch (error) {
     if (error instanceof AxiosError && error.response) {
       throw error.response.data;
@@ -17,7 +17,7 @@ export const getData = async (pathName: string, params?: any) => {
 export const getDataForID = async (pathName: string, id: string) => {
   try {
     const response = await axiosInstance.get(`${api}${pathName}/${id}`);
-    return response;
+    return response.data;
   } catch (error) {
     if (error instanceof AxiosError && error.response) {
       throw error.response.data;
@@ -42,7 +42,7 @@ export const putData = async (pathName: string, id: any, data: any) => {
   try {
     const response = await axiosInstance.put(`${api}${pathName}/${id}`, data);
 
-    return response;
+    return response.data;
   } catch (error) {
     if (error instanceof AxiosError && error.response) {
       throw error.response.data;

@@ -10,6 +10,7 @@ import { LoginServices } from "./login.service";
 import { I_IsLoginContext, IsLoginContext } from "../../Context/login.context";
 import { ToastContainer, toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import { displayError } from "../../utils/common/display-error";
 
 export default function Login() {
   const { setUser, setIsLogin }: I_IsLoginContext = useContext(IsLoginContext);
@@ -37,13 +38,11 @@ export default function Login() {
     loginServices
       .login(dataForm)
       .then((response) => {
-        console.log(response);
         setUser(response);
         setIsLogin(true);
-        navigate("/dash-board");
       })
-      .catch((error) => {
-        toast.error(error.message, { autoClose: 1000 });
+      .catch((error: any) => {
+        displayError(error);
       });
   };
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {

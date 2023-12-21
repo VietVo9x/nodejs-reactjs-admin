@@ -1,8 +1,8 @@
 import React from "react";
 import { Card, CardMedia, Grid } from "@mui/material";
-import { Res_Images } from "../../types/reponse.type";
+import { Image_Res } from "../../types/reponse.type";
 interface Props {
-  images: Res_Images[];
+  images: Image_Res[];
 }
 const ImageList = (props: Props) => {
   return (
@@ -13,7 +13,7 @@ const ImageList = (props: Props) => {
             <CardMedia
               component="img"
               height="200"
-              image={image.image_url}
+              image={image.imageUrl}
               alt={`Image ${index + 1}`}
             />
           </Card>

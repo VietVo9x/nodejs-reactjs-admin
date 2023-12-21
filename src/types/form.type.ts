@@ -12,24 +12,22 @@ export interface F_UserInfo {
   phone: string;
 }
 export interface F_Product {
-  sku: string;
   product_name: string;
   price: number | undefined;
   quantity_stock: number | undefined;
   description: string;
-  category_id: undefined | number;
+  categoryId: number;
   fileInput: undefined | File[];
 }
 export interface F_Product_Update {
-  sku: string;
   product_name: string;
-  price: number | undefined;
-  quantity_stock: number | undefined;
+  price: number;
+  quantity_stock: number;
   description: string;
-  category_id: undefined | number;
-  fileInput?: undefined | File[];
+  categoryId: number;
+  fileInput: undefined | File[];
 }
 export interface F_Category {
-  category_name: string;
+  name: string;
   description: string;
 }

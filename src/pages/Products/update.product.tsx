@@ -1,22 +1,9 @@
 import SendIcon from "@mui/icons-material/Send";
-import { useEffect, useState } from "react";
+import { ReactHTMLElement, useEffect, useState } from "react";
 import FormControl from "@mui/material/FormControl";
 
-import {
-  Box,
-  Button,
-  Card,
-  CardMedia,
-  FormHelperText,
-  Input,
-  InputLabel,
-  MenuItem,
-  Modal,
-  Select,
-  Stack,
-  TextField,
-} from "@mui/material/";
-import { Category_Res, Res_Images } from "../../types/reponse.type";
+import { Box, Button, InputLabel, MenuItem, Modal, Select, TextField } from "@mui/material/";
+import { Category_Res, Image_Res, Product_Res } from "../../types/reponse.type";
 import { getData } from "../../apis/api.service";
 import { _CATEGORY } from "../../apis";
 import { Err_Req_Product } from "../../types/error.request";
@@ -25,6 +12,8 @@ import ImageList from "./ImageList";
 import { F_Product_Update } from "../../types/form.type";
 import { toast } from "react-toastify";
 import { Res_Error } from "../../types/error.response";
+import UpdateImgages from "./update.images-product";
+import { displayError } from "../../utils/common/display-error";
 
 interface Props {
   onShowForm: boolean;
@@ -32,28 +21,23 @@ interface Props {
   errorForm: Err_Req_Product | undefined;
   product: any;
   setProduct: Function;
-  toggleChangeImage: boolean;
-  setToggleChangeImage: Function;
   flag: boolean;
   setFlag: Function;
 }
 export default function UpdateProduct(props: Props) {
   const [categorys, setCategorys] = useState<Category_Res[]>([]);
-  const [images, setImages] = useState<Res_Images[]>([]);
+  const [images, setImages] = useState<Image_Res[]>([]);
   const [isEditing, setIsEditing] = useState(false);
-  const [newImages, setNewImages] = useState<Res_Images[]>([]);
-  const [dataSend, setDataSend] = useState<F_Product_Update>();
+  const [newImages, setNewImages] = useState<File[]>([]);
+  const [toggleChangeImage, setToggleChangeImage] = useState(false);
 
-  const handleFormChange = (e: { target: { name: any; value: any } }) => {
-    const name = e.target.name;
-    const value = e.target.value;
-
+  const handleFormChange = (event: { target: { name: any; value: any } }) => {
+    const name = event.target.name;
+    const value = event.target.value;
     props.setProduct({
       ...props.product,
       [name]: value,
-      category: { id: value, category_name: "" },
     });
-    setDataSend({ ...props.product, [name]: value, category_id: value } as F_Product_Update);
   };
   const productService = new ProductServices();
   const handleEditClick = () => {
@@ -61,60 +45,30 @@ export default function UpdateProduct(props: Props) {
   };
 
   const handleSaveClick = async () => {
-    const { sku, product_name, price, quantity_stock, description, category } =
-      props.product as any;
-
-    // Logic để lưu thông tin
-    let formData;
-    if (!dataSend) {
-      formData = {
-        sku,
-        product_name,
-        price,
-        quantity_stock,
-        description,
-        category_id: category.id,
+    try {
+      const formData: F_Product_Update = {
+        product_name: props.product.product_name,
+        price: props.product.price,
+        quantity_stock: props.product.quantity_stock,
+        description: props.product.description,
+        categoryId: props.product.categoryId,
         fileInput: newImages,
       };
-
       await productService.editProduct(formData, props.product?.id as number);
 
       toast.success("Product updated successfully", {
         autoClose: 1000,
       });
-    }
-    try {
-      // setIsEditing(false);
-
-      if (dataSend) {
-        formData = {
-          sku: dataSend.sku,
-          product_name: dataSend.product_name,
-          price: dataSend.price,
-          quantity_stock: dataSend.quantity_stock,
-          description: dataSend.description,
-          category_id: dataSend.category_id,
-          fileInput: newImages,
-        };
-        await productService.editProduct(formData, props.product?.id as number);
-
-        toast.success("Product updated successfully", {
-          autoClose: 1000,
-        });
-        props.setFlag(!props.flag);
-      }
+      props.setFlag(!props.flag);
     } catch (error) {
-      const newError = error as Res_Error;
-      toast.error(newError.message, {
-        autoClose: 1000,
-      });
+      displayError(error);
     }
   };
 
   useEffect(() => {
     if (props.product) {
-      const formattedImages: Res_Images[] = props.product?.imageProducts.map((image: any) => ({
-        image_url: image.image_url,
+      const formattedImages: Image_Res[] = props.product?.images.map((image: Image_Res) => ({
+        imageUrl: image.imageUrl,
       }));
       setImages(formattedImages);
     }
@@ -122,12 +76,12 @@ export default function UpdateProduct(props: Props) {
   //categorys name
   useEffect(() => {
     getData(_CATEGORY).then((res) => {
-      setCategorys(res?.data);
+      setCategorys(res?.categories);
     });
   }, []);
 
   const handleEditImages = () => {
-    props.setToggleChangeImage(true);
+    setToggleChangeImage(true);
     setNewImages([]);
   };
 
@@ -174,19 +128,6 @@ export default function UpdateProduct(props: Props) {
                     error={Boolean(props.errorForm?.msgProductName)}
                     helperText={props.errorForm?.msgProductName}
                   />
-                  <TextField
-                    disabled={!isEditing}
-                    margin="normal"
-                    required
-                    id="sku"
-                    label="SKU"
-                    name="sku"
-                    fullWidth
-                    value={props.product?.sku}
-                    onChange={handleFormChange}
-                    error={Boolean(props.errorForm?.msgSku)}
-                    helperText={props.errorForm?.msgSku}
-                  />
                 </Box>
                 <Box display={"flex"} gap={2} alignItems={"baseline"}>
                   <TextField
@@ -210,9 +151,9 @@ export default function UpdateProduct(props: Props) {
                       label="Category"
                       disabled={!isEditing}
                       id="demo-simple-select-label"
-                      name="category_name"
+                      name="categoryId"
                       onChange={handleFormChange}
-                      value={props.product?.category.id ?? ""}
+                      value={props.product?.categoryId}
                     >
                       {categorys.length > 0 &&
                         categorys
@@ -222,10 +163,6 @@ export default function UpdateProduct(props: Props) {
                               {category.name}
                             </MenuItem>
                           ))}
-                      {(!props.product?.category.id ||
-                        !categorys.some((cat) => cat.id === props.product?.category.id)) && (
-                        <MenuItem value={-1}>Default Category</MenuItem>
-                      )}
                     </Select>
                   </FormControl>
                 </Box>
@@ -244,7 +181,7 @@ export default function UpdateProduct(props: Props) {
                     error={Boolean(props.errorForm?.msgPrice)}
                     helperText={props.errorForm?.msgPrice}
                   />
-                  <FormControl fullWidth disabled={!isEditing}>
+                  {/* <FormControl fullWidth disabled={!isEditing}>
                     <Select
                       id="demo-simple-select-label"
                       name="brand_id"
@@ -264,7 +201,7 @@ export default function UpdateProduct(props: Props) {
                     <FormHelperText style={{ color: "red" }}>
                       {props.errorForm?.msgCategory}
                     </FormHelperText>
-                  </FormControl>
+                  </FormControl> */}
                 </Box>
                 <Box display={"flex"} gap={2}>
                   <TextField
@@ -292,7 +229,7 @@ export default function UpdateProduct(props: Props) {
                     marginTop: "15px",
                   }}
                 >
-                  {!props.toggleChangeImage ? (
+                  {!toggleChangeImage ? (
                     <ImageList images={images} />
                   ) : (
                     <UpdateImgages setNewImages={setNewImages} newImages={newImages} />
@@ -340,37 +277,5 @@ export default function UpdateProduct(props: Props) {
         </Box>
       </Modal>
     </>
-  );
-}
-
-function UpdateImgages(props: any) {
-  const handleFileChange = (event: any) => {
-    const files = event.target.files;
-    if (files) {
-      const fileList = Array.from(files);
-      props.setNewImages(fileList);
-    }
-  };
-  return (
-    <div>
-      <Input type="file" inputProps={{ multiple: true }} onChange={(e) => handleFileChange(e)} />
-
-      <Stack direction="row" spacing={2}>
-        {props.newImages.map((file: File, index: number) => (
-          <Card key={index} sx={{ maxWidth: 300 }}>
-            <CardMedia
-              component="img"
-              height="200"
-              image={URL.createObjectURL(file)} // Hiển thị ảnh tạm thời từ file đã chọn
-              alt={`Preview ${index}`}
-              sx={{
-                objectFit: "cover",
-              }}
-            />
-          </Card>
-        ))}
-      </Stack>
-      <FormHelperText style={{ color: "red" }}>{props.errorForm?.msgImage}</FormHelperText>
-    </div>
   );
 }

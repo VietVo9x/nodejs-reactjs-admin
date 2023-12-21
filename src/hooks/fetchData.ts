@@ -9,22 +9,18 @@ export const useFetchData = () => {
   const { isLogin, setIsLogin, user, setUser }: I_IsLoginContext = useContext(IsLoginContext);
 
   useEffect(() => {
-    // getData(_VERIFY_TOKEN)
-    //   .then((res) => {
-    //     if (res) {
-    //       setUser(res.data);
-    //       setIsLogin(true);
-    //     }
-    //     setTimeout(() => {
-    //       setLoading(false);
-    //     }, 1000);
-    //   })
-    //   .catch((err) => {
-    //     setTimeout(() => {
-    //       setLoading(false);
-    //     }, 1000);
-    //     setError(err);
-    //   });
+    getData(_VERIFY_TOKEN)
+      .then((res) => {
+        if (res) {
+          setUser(res.data);
+          setIsLogin(() => true);
+        }
+        setLoading(false);
+      })
+      .catch((err) => {
+        setLoading(false);
+        setError(err);
+      });
   }, []);
 
   return {
