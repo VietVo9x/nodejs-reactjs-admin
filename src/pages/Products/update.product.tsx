@@ -14,6 +14,7 @@ import { toast } from "react-toastify";
 import { Res_Error } from "../../types/error.response";
 import UpdateImgages from "./update.images-product";
 import { displayError } from "../../utils/common/display-error";
+import { displaySuccessMessage } from "../../utils/common/display-success";
 
 interface Props {
   onShowForm: boolean;
@@ -30,6 +31,7 @@ export default function UpdateProduct(props: Props) {
   const [isEditing, setIsEditing] = useState(false);
   const [newImages, setNewImages] = useState<File[]>([]);
   const [toggleChangeImage, setToggleChangeImage] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleFormChange = (event: { target: { name: any; value: any } }) => {
     const name = event.target.name;
@@ -45,6 +47,7 @@ export default function UpdateProduct(props: Props) {
   };
 
   const handleSaveClick = async () => {
+    setIsLoading(true);
     try {
       const formData: F_Product_Update = {
         product_name: props.product.product_name,
@@ -54,19 +57,20 @@ export default function UpdateProduct(props: Props) {
         categoryId: props.product.categoryId,
         fileInput: newImages,
       };
-      await productService.editProduct(formData, props.product?.id as number);
-
-      toast.success("Product updated successfully", {
-        autoClose: 1000,
-      });
+      const product = await productService.editProduct(formData, props.product?.id as number);
+      setIsLoading(false);
+      props.setProduct(product);
+      displaySuccessMessage("Product updated successfully");
       props.setFlag(!props.flag);
     } catch (error) {
+      setIsLoading(false);
       displayError(error);
     }
   };
 
   useEffect(() => {
     if (props.product) {
+      console.log("props.product, " + props.product.images);
       const formattedImages: Image_Res[] = props.product?.images.map((image: Image_Res) => ({
         imageUrl: image.imageUrl,
       }));
@@ -181,27 +185,6 @@ export default function UpdateProduct(props: Props) {
                     error={Boolean(props.errorForm?.msgPrice)}
                     helperText={props.errorForm?.msgPrice}
                   />
-                  {/* <FormControl fullWidth disabled={!isEditing}>
-                    <Select
-                      id="demo-simple-select-label"
-                      name="brand_id"
-                      // onChange={handleSelectChange}
-                      value={"brand"}
-                    >
-                      {categorys.length > 0 &&
-                        categorys
-                          .filter((category) => category.status === true)
-                          .map((category, index) => (
-                            <MenuItem value={category.id} key={index}>
-                              {category.name}
-                            </MenuItem>
-                          ))}
-                    </Select>
-
-                    <FormHelperText style={{ color: "red" }}>
-                      {props.errorForm?.msgCategory}
-                    </FormHelperText>
-                  </FormControl> */}
                 </Box>
                 <Box display={"flex"} gap={2}>
                   <TextField
@@ -246,6 +229,7 @@ export default function UpdateProduct(props: Props) {
                       sx={{ mt: 3, mb: 2 }}
                       color="success"
                       onClick={handleSaveClick}
+                      disabled={isLoading}
                     >
                       Save
                     </Button>

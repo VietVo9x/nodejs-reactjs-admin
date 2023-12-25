@@ -12,16 +12,16 @@ import Trash from "../pages/Trash";
 
 export const links = [
   {
-    path: "/",
-    title: "Users",
-    icon: <SupervisedUserCircleIcon />,
-    element: <Users />,
-  },
-  {
     path: "/dash-board",
     title: "Dashboard",
     icon: <SupervisedUserCircleIcon />,
     element: <DashBoard />,
+  },
+  {
+    path: "/",
+    title: "Users",
+    icon: <SupervisedUserCircleIcon />,
+    element: <Users />,
   },
 
   {

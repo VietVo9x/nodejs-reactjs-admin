@@ -9,8 +9,7 @@ import Login from "./pages/Login";
 import { useFetchData } from "./hooks/fetchData";
 import CircularIndeterminate from "./components/Progress";
 function App() {
-  const { loading, user, isLogin } = useFetchData();
-  console.log(isLogin);
+  const { loading, isLogin } = useFetchData();
   return (
     <>
       <div className="App">

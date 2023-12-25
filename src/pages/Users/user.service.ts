@@ -1,5 +1,5 @@
-import { _REGISTER, _USER, _USER_BLOCK } from "../../apis";
-import { postData, putData } from "../../apis/api.service";
+import { _REGISTER, _USER, _USER_STATUS } from "../../apis";
+import { patchData, postData } from "../../apis/api.service";
 import { F_UserRegister } from "../../types/form.type";
 import { Req_UserRegister } from "../../types/request.type";
 export default class UserServices {
@@ -13,12 +13,11 @@ export default class UserServices {
   async updateStatusUser(
     id: number,
     updateUser: {
-      user_name: string;
       status: string;
     }
   ) {
     try {
-      return await putData(_USER_BLOCK, id, updateUser);
+      return await patchData(_USER_STATUS, id, updateUser);
     } catch (error) {
       throw error;
     }

@@ -14,6 +14,7 @@ import {
   Pagination,
   FormControl,
   NativeSelect,
+  Typography,
 } from "@mui/material/";
 import AddIcon from "@mui/icons-material/Add";
 import Stack from "@mui/material/Stack";
@@ -142,7 +143,6 @@ export default function Users() {
   const handleEditStatus = async (id: number, user: User_Res) => {
     try {
       const updateUser = {
-        user_name: user.user_name,
         status: "false",
       };
       if (user.status) {
@@ -239,7 +239,11 @@ export default function Users() {
                     <TableCell align="center">{user.email}</TableCell>
                     <TableCell align="center">{user.role == 0 ? "User" : ""}</TableCell>
                     <TableCell align="center">{formatDate(user.createdAt)}</TableCell>
-                    <TableCell align="center">{user.status ? "Active" : "Block"}</TableCell>
+                    <TableCell align="center">
+                      <Typography p={1} sx={{ p: 1, color: user.status ? "green" : "red" }}>
+                        {user.status ? "Active" : "Block"}
+                      </Typography>
+                    </TableCell>
 
                     <TableCell align="center">
                       <Button

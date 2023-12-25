@@ -6,7 +6,7 @@ import FormControl from "@mui/material/FormControl";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
 import RemoveRedEyeIcon from "@mui/icons-material/RemoveRedEye";
 import EditIcon from "@mui/icons-material/Edit";
-
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import {
   Table,
   TableBody,
@@ -22,47 +22,98 @@ import {
   Button,
   Pagination,
   Container,
+  NativeSelect,
 } from "@mui/material/";
 
 import Stack from "@mui/material/Stack";
 import { formatDate } from "../../utils/format.date";
+import { Orders_Res } from "../../types/reponse.type";
+import { getData } from "../../apis/api.service";
+import { _ORDER } from "../../apis";
+import { useSearchParams } from "react-router-dom";
+import { formatCurrency, perPage } from "../../utils/constants";
+import CustomizedInputBase from "../../components/InputSearch";
+import ViewOrder from "./view.order";
+import { displayError } from "../../utils/common/display-error";
+import OrderService from "./orders.service";
 export default function Orders() {
   const [age, setAge] = React.useState("");
+  const [orders, setOrders] = useState<Orders_Res[]>([]);
+  const [order, setOrder] = useState<Orders_Res | undefined>();
+  const [flag, setFlag] = useState(false);
   const [open, setOpen] = useState(false);
-  const [orders, setOrders] = useState([]);
-  const handleClose = () => {
-    setOpen(false);
+  const orderService = new OrderService();
+  //filter, sort,search
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchValue, setSearchValue] = useState<string>("");
+  const [count, setCount] = useState(0);
+
+  const page = Number(searchParams.get("page")) || 1;
+  const params = React.useRef<{ [key: string]: any }>({ limit: 10 });
+  React.useEffect(() => {
+    searchParams.forEach((value, key) => {
+      params.current[key] = value;
+    });
+    getData(_ORDER, params.current).then((res: any) => {
+      setOrders(res.orders);
+      setCount(Math.ceil(res?.total / perPage));
+    });
+  }, [searchParams, flag]);
+  //thay doi trang
+  const handleChangePage = (event: React.ChangeEvent<unknown>, value: number) => {
+    setSearchParams({ ...params.current, page: value.toString() });
+  };
+  //tim kiem
+  const handleSearch = () => {
+    setSearchParams({ ...params.current, user_name: searchValue, page: "1" });
+  };
+  const clearSearch = () => {
+    setSearchParams({ ...params.current, user_name: "" });
+    setSearchValue("");
+  };
+  //sort
+  const handleChangeSelect: React.ChangeEventHandler<HTMLSelectElement> = (event) => {
+    setAge(event.target.value);
+    switch (event.target.value.toString()) {
+      case "1":
+        setSearchParams({
+          ...params.current,
+          page: "1",
+          sort: "createdAt",
+          order: "ASC",
+        });
+        break;
+      case "2":
+        setSearchParams({
+          ...params.current,
+          page: "1",
+          sort: "createdAt",
+          order: "DESC",
+        });
+
+        break;
+
+      default:
+        setSearchParams({ ...params.current, page: "1", sort: "", order: "" });
+        break;
+    }
   };
 
-  const handleChange = (event: SelectChangeEvent) => {
-    setAge(event.target.value);
+  const handleShowForm = (order: Orders_Res) => {
+    setOpen(true);
+    setOrder(order);
   };
-  const [page, setPage] = React.useState(1);
-  const handleChangePage = (event: React.ChangeEvent<unknown>, value: number) => {
-    setPage(value);
+
+  //xac nhan don hang
+  const handleOrderConfirmation = async (id: number) => {
+    try {
+      await orderService.confirmOrder(id);
+      setFlag(!flag);
+    } catch (error) {
+      displayError(error);
+    }
   };
-  const style = {
-    position: "absolute" as "absolute",
-    top: "50%",
-    left: "50%",
-    transform: "translate(-50%, -50%)",
-    width: 400,
-    bgcolor: "background.paper",
-    boxShadow: 24,
-    p: 4,
-  };
-  const styleBtn = {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: "10px",
-    border: "1px solid #ccc",
-    width: "30px",
-    height: "30px",
-    padding: "20px",
-    backgroundColor: "#ccc",
-    borderRadius: "50%",
-  };
+
   return (
     <Container maxWidth="xl">
       {/* filter */}
@@ -73,6 +124,8 @@ export default function Orders() {
           justifyContent: "space-between",
           alignItems: "center",
         }}
+        mt={3}
+        mb={5}
       >
         <Box
           component="form"
@@ -82,109 +135,92 @@ export default function Orders() {
           noValidate
           autoComplete="off"
         >
-          <TextField id="filled-search" label="Search field" type="search" variant="filled" />
+          <CustomizedInputBase
+            setSearchValue={setSearchValue}
+            onSearch={handleSearch}
+            searchValue={searchValue}
+            onClearSearch={clearSearch}
+          />
         </Box>
-        <FormControl variant="standard" sx={{ m: 1, minWidth: 150, margin: "30px 0 " }}>
-          <InputLabel id="demo-simple-select-standard-label">Sort</InputLabel>
-          <Select
-            labelId="demo-simple-select-standard-label"
-            id="demo-simple-select-standard"
-            value={age}
-            onChange={handleChange}
-            label="Age"
-          >
-            <MenuItem value="">
-              <em>None</em>
-            </MenuItem>
-            <MenuItem value={10}>Sort by name</MenuItem>
-            <MenuItem value={20}>Sort by status</MenuItem>
-          </Select>
-        </FormControl>
+        <Box sx={{ minWidth: 150, marginRight: 10 }}>
+          <FormControl fullWidth>
+            <NativeSelect
+              defaultValue={age}
+              inputProps={{
+                name: "age",
+                id: "uncontrolled-native",
+              }}
+              onChange={handleChangeSelect}
+            >
+              <option value={""}>Sort</option>
+              <option value={1}>CreatedAt (Old)</option>
+              <option value={2}>CreatedAt (New)</option>
+            </NativeSelect>
+          </FormControl>
+        </Box>
       </Box>
       {/* table  */}
       <TableContainer component={Paper}>
         <Table sx={{ minWidth: 650 }} aria-label="simple table">
           <TableHead>
             <TableRow>
-              <TableCell>ID</TableCell>
-              <TableCell align="center">Serial Number</TableCell>
-              <TableCell align="center">Order at</TableCell>
+              <TableCell>Index</TableCell>
+              <TableCell align="center">User Name</TableCell>
               <TableCell align="center">Total price</TableCell>
               <TableCell align="center">Status</TableCell>
-              <TableCell align="center">Create at</TableCell>
+              <TableCell align="center">CreatedAt</TableCell>
+              <TableCell align="center">UpdatedAt</TableCell>
               <TableCell align="center">Action</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {orders &&
-              orders.map((order, index) => (
-                <TableRow key={index} sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
-                  <TableCell component="th" scope="row">
-                    {index}
-                  </TableCell>
-                  <TableCell scope="row" align="center">
-                    1
-                  </TableCell>
-                  <TableCell scope="row" align="center">
-                    2023-11-12
-                  </TableCell>
-                  <TableCell scope="row" align="center">
-                    $ 100.00
-                  </TableCell>
+            {orders.map((order: Orders_Res, index: number) => (
+              <TableRow key={index} sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
+                <TableCell scope="row" align="left">
+                  {index}
+                </TableCell>
+                <TableCell scope="row" align="center">
+                  {order.user_name}
+                </TableCell>
+                <TableCell scope="row" align="center">
+                  {formatCurrency(order.all_price)}
+                </TableCell>
 
-                  <TableCell align="center">Đã xác thực</TableCell>
+                <TableCell scope="row" align="center">
+                  {" "}
+                  <Typography p={1} sx={{ p: 1, color: order.status ? "green" : "red" }}>
+                    {order.status ? "Complete" : "Pending"}{" "}
+                  </Typography>
+                </TableCell>
 
-                  <TableCell scope="row" align="center">
-                    2023-11-12
-                  </TableCell>
-                  <TableCell scope="row" align="center">
-                    2023-11-12
-                  </TableCell>
-                  <TableCell
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
+                <TableCell scope="row" align="center">
+                  {formatDate(order.createdAt)}
+                </TableCell>
+                <TableCell scope="row" align="center">
+                  {formatDate(order.updatedAt)}
+                </TableCell>
+                <TableCell scope="row" align="center">
+                  <Button onClick={() => handleShowForm(order)}>
+                    <RemoveRedEyeIcon color="inherit" />
+                  </Button>
+                  <Button
+                    onClick={() => handleOrderConfirmation(order.id)}
+                    disabled={order.status ? true : false}
                   >
-                    <Typography component={"span"} sx={styleBtn} onClick={() => setOpen(true)}>
-                      <RemoveRedEyeIcon color="inherit" />
-                    </Typography>
-                    <Typography component={"span"} sx={styleBtn}>
-                      <EditIcon color="inherit" />
-                    </Typography>
-                  </TableCell>
-                </TableRow>
-              ))}
+                    <CheckCircleOutlineIcon color="inherit" />
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
           </TableBody>
         </Table>
       </TableContainer>
       {/* phan trang */}
       <Stack spacing={2} sx={{ padding: "15px 0" }}>
-        <Typography>Page: {page}</Typography>
-        <Pagination count={10} page={page} onChange={handleChangePage} color="primary" />
+        <Pagination count={count} page={page} onChange={handleChangePage} color="primary" />
       </Stack>
       {/* modal */}
-      <Modal
-        open={open}
-        onClose={handleClose}
-        aria-labelledby="modal-modal-title"
-        aria-describedby="modal-modal-description"
-      >
-        <Box sx={style}>
-          <Typography id="modal-modal-title" variant="h6" component="h2">
-            Text in a modal
-          </Typography>
-          <Typography id="modal-modal-description" sx={{ mt: 2 }}>
-            Duis mollis, est non commodo luctus, nisi erat porttitor ligula.
-          </Typography>
-          <Box component={"div"} sx={{ textAlign: "right", marginTop: "15px" }}>
-            <Button variant="contained" onClick={handleClose}>
-              Close
-            </Button>
-          </Box>
-        </Box>
-      </Modal>
+      <ViewOrder order={order} open={open} setOpen={setOpen} />
     </Container>
   );
 }

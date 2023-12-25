@@ -50,3 +50,31 @@ export interface Product_Res {
   images: Image_Res[];
   category: Category_Res;
 }
+export interface Orders_Res {
+  id: number;
+  userId: number;
+  user_name: string;
+  status: boolean;
+  all_price: number;
+  createdAt: string;
+  updatedAt: string;
+  shippingAddressId: number;
+  orderDetails: Order_Detail_Res[];
+  shippingAddress: ShippingAddres_Res;
+}
+export interface Order_Detail_Res {
+  id: number;
+  name: string;
+  image: string;
+  quantity: number;
+  productId: number;
+  total_price: number;
+  orderId: number;
+}
+export interface ShippingAddres_Res {
+  id: number;
+  name: string;
+  address: string;
+  phone: string;
+  userId: number;
+}

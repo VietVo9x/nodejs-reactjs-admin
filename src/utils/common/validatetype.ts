@@ -3,7 +3,7 @@ export const isFileArrayValidSize = (files: any) => {
 
   const invalidFiles = files.filter((file: any) => {
     // Kiểm tra kích thước
-    if (file.size > maxSize) {
+    if (file.size < maxSize) {
       return true;
     }
     return false;

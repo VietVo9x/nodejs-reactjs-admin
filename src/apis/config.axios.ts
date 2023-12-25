@@ -17,19 +17,4 @@ axiosInstance.interceptors.request.use(
   }
 );
 
-axiosInstance.interceptors.response.use(
-  function (response) {
-    return response;
-  },
-  function (error) {
-    if (
-      (error.response.status === 401 || error.response.status === 403) &&
-      !error.config.url.includes("verify-token")
-    ) {
-      window.location.reload();
-    }
-    return Promise.reject(error);
-  }
-);
-
 export { axiosInstance };

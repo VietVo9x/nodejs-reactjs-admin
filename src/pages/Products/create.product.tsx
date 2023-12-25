@@ -24,6 +24,7 @@ import { ToastContainer, toast } from "react-toastify";
 import { Res_Error } from "../../types/error.response";
 import { Category_Res } from "../../types/reponse.type";
 import { displayError } from "../../utils/common/display-error";
+import { displaySuccessMessage } from "../../utils/common/display-success";
 
 interface Props {
   onShowForm: boolean;
@@ -39,6 +40,7 @@ export default function CreateProduct(props: Props) {
   const productService = new ProductServices();
   const [categorys, setCategorys] = useState<Category_Res[]>([]);
   const [category, setCategory] = useState<number | undefined>();
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleFormChange = (e: { target: { name: any; value: any } }) => {
     const name = e.target.name;
@@ -71,20 +73,23 @@ export default function CreateProduct(props: Props) {
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
+    setIsLoading(true);
     try {
       const validator = productService.validator(props.newProduct);
       if (validator.isError) {
         props.setErrorForm(validator);
+        setIsLoading(false);
+
         return;
       }
       props.setErrorForm(validator);
       await productService.createProduct(props.newProduct);
-      toast.success("Added product successfully", {
-        autoClose: 1000,
-      });
+      setIsLoading(false);
+      displaySuccessMessage("Create Product Success");
       props.onCloseForm("create");
       props.setFlag(!props.flag);
     } catch (error) {
+      setIsLoading(false);
       displayError(error);
     }
   };
@@ -155,11 +160,13 @@ export default function CreateProduct(props: Props) {
                       value={category}
                     >
                       {categorys.length > 0 &&
-                        categorys.map((category, index) => (
-                          <MenuItem value={category.id} key={index}>
-                            {category.name}
-                          </MenuItem>
-                        ))}
+                        categorys
+                          .filter((category) => category.status === true)
+                          .map((category, index) => (
+                            <MenuItem value={category.id} key={index}>
+                              {category.name}
+                            </MenuItem>
+                          ))}
                     </Select>
 
                     <FormHelperText style={{ color: "red" }}>
@@ -255,6 +262,7 @@ export default function CreateProduct(props: Props) {
                     sx={{ mt: 3, mb: 2 }}
                     color="success"
                     onClick={handleSubmit}
+                    disabled={isLoading}
                   >
                     Create Product
                   </Button>

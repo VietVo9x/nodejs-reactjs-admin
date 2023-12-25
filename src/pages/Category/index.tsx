@@ -37,6 +37,7 @@ import { perPage } from "../../utils/constants";
 import { useSearchParams } from "react-router-dom";
 import CustomizedInputBase from "../../components/InputSearch";
 import UpdateCategory from "./update.category";
+import Empty from "../../components/Empty";
 
 export default function Category() {
   const { openFormUpdate, openFormCreate, handleShowForm, handleClose } = useFormStatus();
@@ -149,7 +150,6 @@ export default function Category() {
       <ToastContainer />
 
       <Box
-        m={5}
         component={"div"}
         mt={3}
         mb={5}
@@ -176,9 +176,7 @@ export default function Category() {
         </Button>
       </Box>
       {categorys.length == 0 ? (
-        <div>
-          <h1>khong co gi</h1>
-        </div>
+        <Empty title="Category Empty" />
       ) : (
         <>
           {/* table  */}

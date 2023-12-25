@@ -34,10 +34,13 @@ import { F_Product } from "../../types/form.type";
 import CreateProduct from "./create.product";
 import { Err_Req_Product } from "../../types/error.request";
 import CustomizedInputBase from "../../components/InputSearch";
-import { Res_Error } from "../../types/error.response";
 import UpdateProduct from "./update.product";
 import { _PRODUCT, _PRODUCT_GET_ALL } from "../../apis";
 import { Product_Res } from "../../types/reponse.type";
+import { displayError } from "../../utils/common/display-error";
+import { displaySuccessMessage } from "../../utils/common/display-success";
+import NoReCord from "../../components/Empty";
+import Empty from "../../components/Empty";
 export default function Products() {
   const { openFormCreate, openFormUpdate, handleShowForm, handleClose } = useFormStatus();
   const [flag, setFlag] = useState(false);
@@ -55,7 +58,6 @@ export default function Products() {
     fileInput: undefined,
   });
 
-  //call api lay du lieu lan dau
   const productServices = new ProductServices(); //services
 
   //filter data start
@@ -69,8 +71,8 @@ export default function Products() {
     searchParams.forEach((value, key) => {
       params.current[key] = value;
     });
-
     getData(_PRODUCT_GET_ALL, params.current).then((res: any) => {
+      console.log(res?.products, "result");
       setProducts(res?.products);
       setCount(Math.ceil(res?.total / perPage));
     });
@@ -171,15 +173,10 @@ export default function Products() {
       };
       await productServices.softDelete(id, softDelete);
 
-      toast.success("Product deleted successfully", {
-        autoClose: 1000,
-      });
+      displaySuccessMessage("Deleted Product successfully");
       setFlag(!flag);
     } catch (error) {
-      const newError = error as Res_Error;
-      toast.error(newError.message, {
-        autoClose: 1000,
-      });
+      displayError(error);
     }
   };
 
@@ -238,7 +235,7 @@ export default function Products() {
 
       {products.length === 0 ? (
         <>
-          <h1>khong co gi</h1>
+          <Empty title="Product Empty" />
         </>
       ) : (
         <>
