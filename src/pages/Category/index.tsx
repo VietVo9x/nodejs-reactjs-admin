@@ -38,6 +38,8 @@ import { useSearchParams } from "react-router-dom";
 import CustomizedInputBase from "../../components/InputSearch";
 import UpdateCategory from "./update.category";
 import Empty from "../../components/Empty";
+import { displayError } from "../../utils/common/display-error";
+import { displaySuccessMessage } from "../../utils/common/display-success";
 
 export default function Category() {
   const { openFormUpdate, openFormCreate, handleShowForm, handleClose } = useFormStatus();
@@ -67,8 +69,10 @@ export default function Category() {
       params.current[key] = value;
     });
     getData(_CATEGORY, params.current).then((res: any) => {
-      setCategorys(res.categories);
-      setCount(Math.ceil(res.total / perPage));
+      if (res) {
+        setCategorys(res.categories);
+        setCount(Math.ceil(res.total / perPage));
+      }
     });
   }, [searchParams, flag]);
 
@@ -83,13 +87,10 @@ export default function Category() {
         isDelete: "true",
       };
       await categoryServices.softDelete(id, sorfDelete);
-      toast.success("Delete Category Success", { autoClose: 1000 });
+      displaySuccessMessage("Soft deleted successfully");
       setFlag(!flag);
     } catch (error) {
-      const newErr = error as Res_Error;
-      toast.error(newErr.message, {
-        autoClose: 1000,
-      });
+      displayError(error);
     }
   };
 
@@ -104,11 +105,6 @@ export default function Category() {
   const clearSearch = () => {
     setSearchParams({ ...params.current, search_name: "" });
     setSearchValue("");
-  };
-
-  //sort
-  const handleChangeSelect: React.ChangeEventHandler<HTMLSelectElement> = (event) => {
-    setAge(event.target.value);
   };
 
   //edit
@@ -130,18 +126,7 @@ export default function Category() {
       await categoryServices.blockCategory(element.id, updateStatus);
       setFlag(!flag);
     } catch (error) {
-      const newError = error as Res_Error;
-
-      if (Array.isArray(newError.message)) {
-        const errorMessage = newError.message.join(", ");
-
-        toast.error(errorMessage, {
-          autoClose: 1000,
-        });
-      }
-      toast.error(newError.message, {
-        autoClose: 1000,
-      });
+      displayError(error);
     }
   };
 

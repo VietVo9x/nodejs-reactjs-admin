@@ -28,22 +28,24 @@ export default function Login() {
   const loginServices = new LoginServices();
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const error = await loginServices.validator(dataForm); //validate form
+    try {
+      const error = await loginServices.validator(dataForm); //validate form
 
-    if (error.isError) {
+      if (error.isError) {
+        setError({ ...error });
+        return;
+      }
       setError({ ...error });
-      return;
-    }
-    setError({ ...error });
-    loginServices
-      .login(dataForm)
-      .then((response) => {
-        setUser(response);
+      const login = await loginServices.login(dataForm);
+      console.log(login);
+      if (login) {
+        setUser(login);
         setIsLogin(true);
-      })
-      .catch((error: any) => {
-        displayError(error);
-      });
+        navigate("/dash-board");
+      }
+    } catch (error) {
+      displayError(error);
+    }
   };
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const name = event.target.name;

@@ -33,6 +33,7 @@ import { useFormStatus } from "../../utils/customhooks/function.custom";
 import { F_UserRegister } from "../../types/form.type";
 import CustomizedInputBase from "../../components/InputSearch";
 import { displayError } from "../../utils/common/display-error";
+import Empty from "../../components/Empty";
 
 export default function Users() {
   const { openFormView, openFormCreate, handleShowForm, handleClose } = useFormStatus();
@@ -78,8 +79,10 @@ export default function Users() {
       const res = await getData(
         `${_USER}?page=${page}&limit=10&search_name=${search}&sort_name=${sortValue}&sort_order=${sortOrder}`
       );
-      setUsers(res?.users);
-      setCount(Math.ceil(res?.totalUsers / perPage));
+      if (res) {
+        setUsers(res?.users);
+        setCount(Math.ceil(res?.totalUsers / perPage));
+      }
     } catch (error) {
       displayError(error);
     }
@@ -210,9 +213,7 @@ export default function Users() {
       </Box>
       {/* table  */}
       {users.length == 0 ? (
-        <div>
-          <h1>khong co gi</h1>
-        </div>
+        <Empty title="Users is Empty" />
       ) : (
         <>
           <TableContainer component={Paper}>

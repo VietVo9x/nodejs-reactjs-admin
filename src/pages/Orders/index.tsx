@@ -36,10 +36,12 @@ import CustomizedInputBase from "../../components/InputSearch";
 import ViewOrder from "./view.order";
 import { displayError } from "../../utils/common/display-error";
 import OrderService from "./orders.service";
+import Empty from "../../components/Empty";
 export default function Orders() {
   const [age, setAge] = React.useState("");
   const [orders, setOrders] = useState<Orders_Res[]>([]);
   const [order, setOrder] = useState<Orders_Res | undefined>();
+  console.log(orders);
   const [flag, setFlag] = useState(false);
   const [open, setOpen] = useState(false);
   const orderService = new OrderService();
@@ -55,8 +57,10 @@ export default function Orders() {
       params.current[key] = value;
     });
     getData(_ORDER, params.current).then((res: any) => {
-      setOrders(res.orders);
-      setCount(Math.ceil(res?.total / perPage));
+      if (res) {
+        setOrders(res.orders);
+        setCount(Math.ceil(res?.total / perPage));
+      }
     });
   }, [searchParams, flag]);
   //thay doi trang
@@ -115,112 +119,124 @@ export default function Orders() {
   };
 
   return (
-    <Container maxWidth="xl">
-      {/* filter */}
-      <Box
-        component={"div"}
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-        mt={3}
-        mb={5}
-      >
+    <>
+      <Container maxWidth="xl">
         <Box
-          component="form"
+          component={"div"}
           sx={{
-            "& .MuiTextField-root": { m: 1, width: "300px" },
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
           }}
-          noValidate
-          autoComplete="off"
+          mt={3}
+          mb={5}
         >
-          <CustomizedInputBase
-            setSearchValue={setSearchValue}
-            onSearch={handleSearch}
-            searchValue={searchValue}
-            onClearSearch={clearSearch}
-          />
+          <Box
+            component="form"
+            sx={{
+              "& .MuiTextField-root": { m: 1, width: "300px" },
+            }}
+            noValidate
+            autoComplete="off"
+          >
+            <CustomizedInputBase
+              setSearchValue={setSearchValue}
+              onSearch={handleSearch}
+              searchValue={searchValue}
+              onClearSearch={clearSearch}
+            />
+          </Box>
+          <Box sx={{ minWidth: 150, marginRight: 10 }}>
+            <FormControl fullWidth>
+              <NativeSelect
+                defaultValue={age}
+                inputProps={{
+                  name: "age",
+                  id: "uncontrolled-native",
+                }}
+                onChange={handleChangeSelect}
+              >
+                <option value={""}>Sort</option>
+                <option value={1}>CreatedAt (Old)</option>
+                <option value={2}>CreatedAt (New)</option>
+              </NativeSelect>
+            </FormControl>
+          </Box>
         </Box>
-        <Box sx={{ minWidth: 150, marginRight: 10 }}>
-          <FormControl fullWidth>
-            <NativeSelect
-              defaultValue={age}
-              inputProps={{
-                name: "age",
-                id: "uncontrolled-native",
-              }}
-              onChange={handleChangeSelect}
-            >
-              <option value={""}>Sort</option>
-              <option value={1}>CreatedAt (Old)</option>
-              <option value={2}>CreatedAt (New)</option>
-            </NativeSelect>
-          </FormControl>
-        </Box>
-      </Box>
-      {/* table  */}
-      <TableContainer component={Paper}>
-        <Table sx={{ minWidth: 650 }} aria-label="simple table">
-          <TableHead>
-            <TableRow>
-              <TableCell>Index</TableCell>
-              <TableCell align="center">User Name</TableCell>
-              <TableCell align="center">Total price</TableCell>
-              <TableCell align="center">Status</TableCell>
-              <TableCell align="center">CreatedAt</TableCell>
-              <TableCell align="center">UpdatedAt</TableCell>
-              <TableCell align="center">Action</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {orders.map((order: Orders_Res, index: number) => (
-              <TableRow key={index} sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
-                <TableCell scope="row" align="left">
-                  {index}
-                </TableCell>
-                <TableCell scope="row" align="center">
-                  {order.user_name}
-                </TableCell>
-                <TableCell scope="row" align="center">
-                  {formatCurrency(order.all_price)}
-                </TableCell>
+        <>
+          {orders && orders.length > 0 ? (
+            <>
+              {" "}
+              <TableContainer component={Paper}>
+                <Table sx={{ minWidth: 650 }} aria-label="simple table">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Index</TableCell>
+                      <TableCell align="center">User Name</TableCell>
+                      <TableCell align="center">Total price</TableCell>
+                      <TableCell align="center">Status</TableCell>
+                      <TableCell align="center">CreatedAt</TableCell>
+                      <TableCell align="center">UpdatedAt</TableCell>
+                      <TableCell align="center">Action</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {orders.map((order: Orders_Res, index: number) => (
+                      <TableRow
+                        key={index}
+                        sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+                      >
+                        <TableCell scope="row" align="left">
+                          {index}
+                        </TableCell>
+                        <TableCell scope="row" align="center">
+                          {order.user_name}
+                        </TableCell>
+                        <TableCell scope="row" align="center">
+                          {formatCurrency(order.all_price)}
+                        </TableCell>
 
-                <TableCell scope="row" align="center">
-                  {" "}
-                  <Typography p={1} sx={{ p: 1, color: order.status ? "green" : "red" }}>
-                    {order.status ? "Complete" : "Pending"}{" "}
-                  </Typography>
-                </TableCell>
+                        <TableCell scope="row" align="center">
+                          {" "}
+                          <Typography p={1} sx={{ p: 1, color: order.status ? "green" : "red" }}>
+                            {order.status ? "Complete" : "Pending"}{" "}
+                          </Typography>
+                        </TableCell>
 
-                <TableCell scope="row" align="center">
-                  {formatDate(order.createdAt)}
-                </TableCell>
-                <TableCell scope="row" align="center">
-                  {formatDate(order.updatedAt)}
-                </TableCell>
-                <TableCell scope="row" align="center">
-                  <Button onClick={() => handleShowForm(order)}>
-                    <RemoveRedEyeIcon color="inherit" />
-                  </Button>
-                  <Button
-                    onClick={() => handleOrderConfirmation(order.id)}
-                    disabled={order.status ? true : false}
-                  >
-                    <CheckCircleOutlineIcon color="inherit" />
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-      {/* phan trang */}
-      <Stack spacing={2} sx={{ padding: "15px 0" }}>
-        <Pagination count={count} page={page} onChange={handleChangePage} color="primary" />
-      </Stack>
-      {/* modal */}
-      <ViewOrder order={order} open={open} setOpen={setOpen} />
-    </Container>
+                        <TableCell scope="row" align="center">
+                          {formatDate(order.createdAt)}
+                        </TableCell>
+                        <TableCell scope="row" align="center">
+                          {formatDate(order.updatedAt)}
+                        </TableCell>
+                        <TableCell scope="row" align="center">
+                          <Button onClick={() => handleShowForm(order)}>
+                            <RemoveRedEyeIcon color="inherit" />
+                          </Button>
+                          <Button
+                            onClick={() => handleOrderConfirmation(order.id)}
+                            disabled={order.status ? true : false}
+                          >
+                            <CheckCircleOutlineIcon color="inherit" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+              {/* phan trang */}
+              <Stack spacing={2} sx={{ padding: "15px 0" }}>
+                <Pagination count={count} page={page} onChange={handleChangePage} color="primary" />
+              </Stack>
+              {/* modal */}
+              <ViewOrder order={order} open={open} setOpen={setOpen} />
+            </>
+          ) : (
+            <Empty title="Orders is Empty" />
+          )}
+        </>
+      </Container>
+    </>
   );
 }

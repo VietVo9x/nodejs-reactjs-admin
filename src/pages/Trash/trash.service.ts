@@ -1,9 +1,8 @@
-import { _RESTORE_PRODUCT } from "../../apis";
+import { _CATEGORY_SOFTDELETE, _RESTORE_PRODUCT } from "../../apis";
 import { patchData } from "../../apis/api.service";
 
 export class TrashService {
   async retoreProduct(id: number) {
-    console.log(id);
     try {
       const restore = {
         isDelete: "false",
@@ -13,5 +12,14 @@ export class TrashService {
       throw error;
     }
   }
-  retoreCategory(id: number) {}
+  async retoreCategory(id: number) {
+    try {
+      const restore = {
+        isDelete: "false",
+      };
+      return await patchData(_CATEGORY_SOFTDELETE, id, restore);
+    } catch (error) {
+      throw error;
+    }
+  }
 }

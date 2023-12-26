@@ -28,7 +28,7 @@ import { ToastContainer, toast } from "react-toastify";
 
 import { useSearchParams } from "react-router-dom";
 import { formatCurrency, perPage } from "../../utils/constants";
-import { getData } from "../../apis/api.service";
+import { getData, postData } from "../../apis/api.service";
 import { useFormStatus } from "../../utils/customhooks/function.custom";
 import { F_Product } from "../../types/form.type";
 import CreateProduct from "./create.product";
@@ -47,6 +47,8 @@ export default function Products() {
   const [age, setAge] = React.useState("");
   const [products, setProducts] = useState<Product_Res[]>([]);
   const [product, setProduct] = useState<Product_Res>();
+  const [isLoading, setIsLoading] = useState(false);
+
   const [errorForm, setErrorForm] = useState<Err_Req_Product | undefined>();
 
   const [newProduct, setNewProduct] = useState<F_Product>({
@@ -63,20 +65,46 @@ export default function Products() {
   //filter data start
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchValue, setSearchValue] = useState<string>("");
-  const [count, setCount] = useState(0);
-
   const page = Number(searchParams.get("page")) || 1;
   const params = React.useRef<{ [key: string]: any }>({ limit: 10 });
-  React.useEffect(() => {
-    searchParams.forEach((value, key) => {
-      params.current[key] = value;
-    });
+  const [count, setCount] = useState(0);
+  searchParams.forEach((value, key) => {
+    params.current[key] = value;
+  });
+
+  const fetchData = (): void => {
     getData(_PRODUCT_GET_ALL, params.current).then((res: any) => {
-      console.log(res?.products, "result");
-      setProducts(res?.products);
-      setCount(Math.ceil(res?.total / perPage));
+      if (res) {
+        console.log(res);
+        setProducts(res.products);
+        setCount(Math.ceil(res.total / perPage));
+      }
     });
+  };
+  React.useEffect(() => {
+    fetchData();
   }, [searchParams, flag]);
+
+  const handleSubmit = async () => {
+    setIsLoading(true);
+    try {
+      const validator = productServices.validator(newProduct);
+      setErrorForm(validator);
+      if (validator.isError) {
+        setIsLoading(false);
+        return;
+      }
+      await productServices.createProduct(newProduct);
+      setIsLoading(false);
+      handleClose("create");
+      displaySuccessMessage("Product created successfully");
+      fetchData();
+      setSearchParams({ ...params.current, page: "1" });
+    } catch (error) {
+      setIsLoading(false);
+      displayError(error);
+    }
+  };
   //thay doi trang
   const handleChangePage = (event: React.ChangeEvent<unknown>, value: number) => {
     setSearchParams({ ...params.current, page: value.toString() });
@@ -313,8 +341,9 @@ export default function Products() {
         setErrorForm={setErrorForm}
         newProduct={newProduct}
         setNewProduct={setNewProduct}
-        flag={flag}
-        setFlag={setFlag}
+        isLoading={isLoading}
+        setIsLoading={setIsLoading}
+        onSubmit={handleSubmit}
       />
     </div>
   );

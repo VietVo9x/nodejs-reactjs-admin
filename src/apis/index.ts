@@ -9,6 +9,7 @@ export const _CATEGORY_CREATE = "/category";
 export const _CATEGORY_UPDATE = "/category";
 export const _CATEGORY_BLOCK = "/category/block";
 export const _CATEGORY_SOFTDELETE = "/category/soft-delete";
+export const _CATEGORY_GET_DELETE = "/category/getSoftDelete";
 export const _ORDER = "/orders";
 export const _USER = "/users";
 export const _REGISTER = "/users/register";

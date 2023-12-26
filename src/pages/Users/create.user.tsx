@@ -6,6 +6,7 @@ import { Res_Error } from "../../types/error.response";
 import { ToastContainer, toast } from "react-toastify";
 import UserServices from "./user.service";
 import { displayError } from "../../utils/common/display-error";
+import { displaySuccessMessage } from "../../utils/common/display-success";
 interface Props {
   userCreate: F_UserRegister;
   setUserCreate: Function;
@@ -62,11 +63,11 @@ export default function CreateUser(props: Props) {
         return;
       }
       await userService.register(props.userCreate);
-      toast.success("Successful account registration", {
-        autoClose: 1000,
-      });
+      displaySuccessMessage("User created successfully");
       props.setFlag(!props.flag);
+
       props.onClose("create");
+      props.setUserCreate({ user_name: "", email: "", password: "", confirm_password: "" });
     } catch (error) {
       displayError(error);
     }

@@ -29,7 +29,7 @@ export const getDataForID = async (pathName: string, id: string) => {
 export const postData = async (pathName: string, data: any) => {
   try {
     const response = await axiosInstance.post(api + pathName, data);
-    return response;
+    return response.data;
   } catch (error) {
     if (error instanceof AxiosError && error.response) {
       throw error.response.data;

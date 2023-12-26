@@ -31,9 +31,10 @@ export class LoginServices {
   async login(dataForm: Req_UserLogin) {
     try {
       const result = await postData(_LOGIN, dataForm);
-      if (result?.data.user.role == 0) throw new Error("Your account is not an admin");
-      localStorage.setItem("token", result?.data.token);
-      return result?.data.user;
+      console.log(1111111, result);
+      if (result.user.role == 0) throw new Error("Your account is not an admin");
+      localStorage.setItem("token", result?.token);
+      return result?.user;
     } catch (error) {
       throw error;
     }

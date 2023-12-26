@@ -25,6 +25,7 @@ export default function ViewUser(props: Props) {
     updatedAt: "",
     deletedAt: "",
   });
+  console.log(dataForm);
 
   useEffect(() => {
     if (props.data) {
@@ -110,7 +111,7 @@ export default function ViewUser(props: Props) {
               label="Full Name"
               name="full_name"
               fullWidth
-              value={dataForm.user_name}
+              value={dataForm.full_name}
               disabled={true}
             />
 
@@ -122,16 +123,6 @@ export default function ViewUser(props: Props) {
               name="phone"
               fullWidth
               value={dataForm.phone}
-              disabled={true}
-            />
-            <TextField
-              margin="normal"
-              required
-              id="address"
-              label="Address"
-              name="address"
-              fullWidth
-              value={dataForm.address}
               disabled={true}
             />
 

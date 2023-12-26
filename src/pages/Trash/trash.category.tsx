@@ -1,3 +1,14 @@
+import React, { useState } from "react";
+import { Category_Res } from "../../types/reponse.type";
+import { TrashService } from "./trash.service";
+import { useSearchParams } from "react-router-dom";
+import { _CATEGORY_GET_DELETE } from "../../apis";
+import { getData } from "../../apis/api.service";
+import { perPage } from "../../utils/constants";
+import RestoreFromTrashIcon from "@mui/icons-material/RestoreFromTrash";
+
+import { displayError } from "../../utils/common/display-error";
+import Empty from "../../components/Empty";
 import {
   Button,
   Pagination,
@@ -10,19 +21,9 @@ import {
   TableHead,
   TableRow,
 } from "@mui/material";
-import Empty from "../../components/Empty";
-import { Product_Res } from "../../types/reponse.type";
-import React, { useState } from "react";
-import { formatCurrency, perPage } from "../../utils/constants";
-import RestoreFromTrashIcon from "@mui/icons-material/RestoreFromTrash";
-import { useSearchParams } from "react-router-dom";
-import { _PRODUCT_GET_DELETE } from "../../apis";
-import { getData } from "../../apis/api.service";
-import { TrashService } from "./trash.service";
-import { displayError } from "../../utils/common/display-error";
 
-export default function TrashProduct() {
-  const [products, setProducts] = useState<Product_Res[]>([]);
+export default function TrashCategory() {
+  const [categories, setCategories] = useState<Category_Res[]>([]);
   const [flag, setFlag] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const trashService = new TrashService();
@@ -35,8 +36,9 @@ export default function TrashProduct() {
     searchParams.forEach((value, key) => {
       params.current[key] = value;
     });
-    getData(_PRODUCT_GET_DELETE, params.current).then((res: any) => {
-      setProducts(res?.products);
+    getData(_CATEGORY_GET_DELETE, params.current).then((res: any) => {
+      console.log(res);
+      setCategories(res?.categories);
       setCount(Math.ceil(res?.total / perPage));
     });
   }, [searchParams, flag]);
@@ -46,25 +48,22 @@ export default function TrashProduct() {
   };
   //restore
   const handleRestoreProduct = async (id: number) => {
-    const confirm = window.confirm("Are you sure you want to restore");
-    if (!confirm) return;
     setIsLoading(true);
     try {
-      await trashService.retoreProduct(id);
+      await trashService.retoreCategory(id);
       setIsLoading(false);
       setFlag(!flag);
     } catch (error) {
       setIsLoading(false);
-
       displayError(error);
     }
   };
 
   return (
     <>
-      {products.length === 0 ? (
+      {categories.length === 0 ? (
         <>
-          <Empty title="Product Trash Empty" />
+          <Empty title="Category Trash Empty" />
         </>
       ) : (
         <>
@@ -74,14 +73,13 @@ export default function TrashProduct() {
                 <TableRow>
                   <TableCell scope="row">Index</TableCell>
                   <TableCell align="center">Name</TableCell>
-                  <TableCell align="center">Price</TableCell>
-                  <TableCell align="center">Stock</TableCell>
+                  <TableCell align="center">Description</TableCell>
                   <TableCell align="center">Actions</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {products &&
-                  products.map((product, index) => (
+                {categories &&
+                  categories.map((category, index) => (
                     <TableRow key={index}>
                       <TableCell
                         align="center"
@@ -94,15 +92,14 @@ export default function TrashProduct() {
                       >
                         {index + 1}
                       </TableCell>
-                      <TableCell align="center">{product.product_name}</TableCell>
-                      <TableCell align="center">{formatCurrency(product.price)}</TableCell>
-                      <TableCell align="center">{product.quantity_stock}</TableCell>
+                      <TableCell align="center">{category.name}</TableCell>
+                      <TableCell align="center">{category.description}</TableCell>
                       <TableCell align="center">
                         <Button
                           variant="contained"
                           color="primary"
                           disabled={isLoading}
-                          onClick={() => handleRestoreProduct(product.id)}
+                          onClick={() => handleRestoreProduct(category.id)}
                         >
                           <RestoreFromTrashIcon />
                         </Button>

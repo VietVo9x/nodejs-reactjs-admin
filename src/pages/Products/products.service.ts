@@ -2,6 +2,7 @@ import { patchData, postData, putData } from "../../apis/api.service";
 import { F_Product } from "../../types/form.type";
 import { _PRODUCT } from "../../apis";
 import { isFileArrayValidSize, isValidFileTypes } from "../../utils/common/validatetype";
+import { isNumber } from "util";
 
 export class ProductServices {
   async createProduct(dataForm: F_Product) {
@@ -62,6 +63,9 @@ export class ProductServices {
     } else if (Number(dataForm.price) <= 0) {
       error.isError = true;
       error.msgPrice = "Price must be greater than 0";
+    } else if (isNaN(dataForm.price)) {
+      error.isError = true;
+      error.msgPrice = "Price must be a number";
     }
     if (!dataForm.quantity_stock) {
       error.isError = true;
@@ -69,6 +73,9 @@ export class ProductServices {
     } else if (Number(dataForm.quantity_stock) <= 0) {
       error.isError = true;
       error.msgQuantityStock = "Stock quantity must be greater than 0";
+    } else if (isNaN(dataForm.quantity_stock)) {
+      error.isError = true;
+      error.msgQuantityStock = "Quantity must be a number";
     }
 
     if (!dataForm.fileInput) {

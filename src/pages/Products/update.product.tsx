@@ -41,6 +41,7 @@ export default function UpdateProduct(props: Props) {
       [name]: value,
     });
   };
+
   const productService = new ProductServices();
   const handleEditClick = () => {
     setIsEditing(true);
@@ -59,9 +60,8 @@ export default function UpdateProduct(props: Props) {
       };
       const product = await productService.editProduct(formData, props.product?.id as number);
       setIsLoading(false);
-      props.setProduct(product);
       displaySuccessMessage("Product updated successfully");
-      props.setFlag(!props.flag);
+      props.setProduct(product);
     } catch (error) {
       setIsLoading(false);
       displayError(error);
@@ -70,7 +70,6 @@ export default function UpdateProduct(props: Props) {
 
   useEffect(() => {
     if (props.product) {
-      console.log("props.product, " + props.product.images);
       const formattedImages: Image_Res[] = props.product?.images.map((image: Image_Res) => ({
         imageUrl: image.imageUrl,
       }));
@@ -87,6 +86,12 @@ export default function UpdateProduct(props: Props) {
   const handleEditImages = () => {
     setToggleChangeImage(true);
     setNewImages([]);
+  };
+
+  const handleCloseForm = () => {
+    props.onCloseForm("update");
+    setIsEditing(false);
+    props.setFlag(!props.flag);
   };
 
   const style = {
@@ -247,10 +252,7 @@ export default function UpdateProduct(props: Props) {
                     variant="contained"
                     type="button"
                     sx={{ mt: 3, mb: 2 }}
-                    onClick={() => {
-                      props.onCloseForm("update");
-                      setIsEditing(false);
-                    }}
+                    onClick={handleCloseForm}
                   >
                     Close
                   </Button>

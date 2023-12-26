@@ -21,7 +21,6 @@ import { F_Product } from "../../types/form.type";
 import { Err_Req_Product } from "../../types/error.request";
 import { ProductServices } from "./products.service";
 import { ToastContainer, toast } from "react-toastify";
-import { Res_Error } from "../../types/error.response";
 import { Category_Res } from "../../types/reponse.type";
 import { displayError } from "../../utils/common/display-error";
 import { displaySuccessMessage } from "../../utils/common/display-success";
@@ -33,14 +32,13 @@ interface Props {
   setErrorForm: Function;
   newProduct: F_Product;
   setNewProduct: Function;
-  setFlag: Function;
-  flag: boolean;
+  isLoading: boolean;
+  setIsLoading: Function;
+  onSubmit: Function;
 }
 export default function CreateProduct(props: Props) {
-  const productService = new ProductServices();
   const [categorys, setCategorys] = useState<Category_Res[]>([]);
   const [category, setCategory] = useState<number | undefined>();
-  const [isLoading, setIsLoading] = useState(false);
 
   const handleFormChange = (e: { target: { name: any; value: any } }) => {
     const name = e.target.name;
@@ -73,34 +71,18 @@ export default function CreateProduct(props: Props) {
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
-    setIsLoading(true);
-    try {
-      const validator = productService.validator(props.newProduct);
-      if (validator.isError) {
-        props.setErrorForm(validator);
-        setIsLoading(false);
-
-        return;
-      }
-      props.setErrorForm(validator);
-      await productService.createProduct(props.newProduct);
-      setIsLoading(false);
-      displaySuccessMessage("Create Product Success");
-      props.onCloseForm("create");
-      props.setFlag(!props.flag);
-    } catch (error) {
-      setIsLoading(false);
-      displayError(error);
-    }
+    props.onSubmit();
   };
   //categorys name
   useEffect(() => {
     getData(_CATEGORY).then((res) => {
-      const categorys = res?.categories.filter(
-        (category: Category_Res) => category.status === true
-      );
-      setCategorys(categorys);
-      setCategory(categorys[0].id);
+      if (res) {
+        const categorys = res?.categories.filter(
+          (category: Category_Res) => category.status === true
+        );
+        setCategorys(categorys);
+        if (categorys.length > 0) setCategory(categorys[0].id);
+      }
     });
   }, []);
   useEffect(() => {
@@ -155,18 +137,16 @@ export default function CreateProduct(props: Props) {
                   <FormControl fullWidth>
                     <Select
                       id="demo-simple-select-label"
-                      name="categotyId"
+                      name="categoryId"
                       onChange={handleSelectChange}
                       value={category}
                     >
                       {categorys.length > 0 &&
-                        categorys
-                          .filter((category) => category.status === true)
-                          .map((category, index) => (
-                            <MenuItem value={category.id} key={index}>
-                              {category.name}
-                            </MenuItem>
-                          ))}
+                        categorys.map((category, index) => (
+                          <MenuItem value={category.id} key={index}>
+                            {category.name}
+                          </MenuItem>
+                        ))}
                     </Select>
 
                     <FormHelperText style={{ color: "red" }}>
@@ -262,7 +242,7 @@ export default function CreateProduct(props: Props) {
                     sx={{ mt: 3, mb: 2 }}
                     color="success"
                     onClick={handleSubmit}
-                    disabled={isLoading}
+                    disabled={props.isLoading}
                   >
                     Create Product
                   </Button>
